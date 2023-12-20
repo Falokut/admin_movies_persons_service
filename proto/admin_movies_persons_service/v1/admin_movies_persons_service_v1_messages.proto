@@ -1,0 +1,89 @@
+syntax = "proto3";
+
+package admin_movies_persons_service;
+option go_package = "admin_movies_persons_service/v1/protos";
+import "google/protobuf/timestamp.proto";
+
+message SearchPersonRequest {
+    string PersonName = 1[json_name="person_name"];
+
+    // must be in range 10-100
+    int32 limit = 2;
+  
+    // must be > 0
+    int32 page = 3;
+}
+
+message DeletePersonsResponce {
+  repeated string DeletedPersonIDs = 1[json_name="deleted_persons_ids"];
+}
+
+message GetPersonsRequest {
+  // use ',' as separator
+  string PersonsIDs = 1[json_name="persons_ids"];
+
+  // must be in range 10-100
+  int32 limit = 2;
+
+  // must be > 0
+  int32 page = 3;
+}
+
+message CreatePersonResponce {
+  string PersonID = 1[json_name="person_id"];;
+}
+
+message UpdatePersonFieldsRequest {
+  // person id for updating
+ string ID = 1[json_name="id"];
+ optional string fullnameRU =2[json_name="fullname_ru"];
+ optional string fullnameEN =3[json_name="fullname_en"];
+ optional google.protobuf.Timestamp birthday = 4;
+ optional string sex = 5;
+ optional bytes photo = 6[json_name="photo"];
+}
+
+message UpdatePersonRequest {
+  // person id for updating
+ string ID = 1[json_name="id"];
+ string fullnameRU =2[json_name="fullname_ru"];
+ string fullnameEN =3[json_name="fullname_en"];
+ google.protobuf.Timestamp birthday = 4;
+ string sex = 5;
+ bytes photo = 6[json_name="photo"];
+}
+
+message CreatePersonRequest {
+  string fullnameRU =1[json_name="fullname_ru"];
+  optional string fullnameEN =2[json_name="fullname_en"];
+  optional google.protobuf.Timestamp birthday = 3;
+  optional string sex = 4;
+  optional bytes photo = 5[json_name="photo"];
+}
+
+message DeletePersonsRequest {
+  // use ',' as separator
+  string PersonsIDs = 1[json_name="persons_ids"];
+}
+
+message IsPersonExistsResponse {
+  bool PersonExists = 1[json_name="person_exists"];
+}
+
+message IsPersonExistsRequest {
+  string PersonID =  1[json_name="person_id"];
+}
+
+message Person {
+  string fullnameRU =1[json_name="fullname_ru"];
+  string fullnameEN =2[json_name="fullname_en"];
+  string birthday = 3;
+  string sex = 4;
+  string photoUrl = 5[json_name="photo_url"];
+}
+
+message Persons {
+  map<string, Person> persons = 1;
+}
+
+message UserErrorMessage { string message = 1 [ json_name = "message" ]; }

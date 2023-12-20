@@ -1,0 +1,528 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Admin panel for movies persons service",
+    "version": "1.0",
+    "contact": {
+      "name": "Falokut",
+      "url": "https://github.com/Falokut",
+      "email": "timur.sinelnik@yandex.ru"
+    }
+  },
+  "tags": [
+    {
+      "name": "moviesPersonsServiceV1"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/v1/person": {
+      "get": {
+        "operationId": "moviesPersonsServiceV1_GetPersons",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/admin_movies_persons_servicePersons"
+            }
+          },
+          "404": {
+            "description": "Returned when the resource does not exist.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "500": {
+            "description": "Something went wrong.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "persons_ids",
+            "description": "use ',' as separator",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "description": "must be in range 10-100",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "page",
+            "description": "must be \u003e 0",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "moviesPersonsServiceV1"
+        ]
+      },
+      "delete": {
+        "operationId": "moviesPersonsServiceV1_DeletePersons",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/admin_movies_persons_serviceDeletePersonsResponce"
+            }
+          },
+          "404": {
+            "description": "Returned when person not found",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "500": {
+            "description": "Something went wrong.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "persons_ids",
+            "description": "use ',' as separator",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "moviesPersonsServiceV1"
+        ]
+      },
+      "post": {
+        "operationId": "moviesPersonsServiceV1_CreatePerson",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/admin_movies_persons_serviceCreatePersonResponce"
+            }
+          },
+          "404": {
+            "description": "Returned when the resource does not exist.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "409": {
+            "description": "Returned when person already (when all fields exept photo same) exist",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "500": {
+            "description": "Something went wrong.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/admin_movies_persons_serviceCreatePersonRequest"
+            }
+          }
+        ],
+        "tags": [
+          "moviesPersonsServiceV1"
+        ]
+      }
+    },
+    "/v1/person/exist": {
+      "get": {
+        "operationId": "moviesPersonsServiceV1_IsPersonExists",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/admin_movies_persons_serviceIsPersonExistsResponse"
+            }
+          },
+          "404": {
+            "description": "Returned when the resource does not exist.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "500": {
+            "description": "Something went wrong.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "person_id",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "moviesPersonsServiceV1"
+        ]
+      }
+    },
+    "/v1/person/search": {
+      "get": {
+        "operationId": "moviesPersonsServiceV1_SearchPerson",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/admin_movies_persons_servicePersons"
+            }
+          },
+          "404": {
+            "description": "Returned when the resource does not exist.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "500": {
+            "description": "Something went wrong.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "person_name",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "limit",
+            "description": "must be in range 10-100",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "page",
+            "description": "must be \u003e 0",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "tags": [
+          "moviesPersonsServiceV1"
+        ]
+      }
+    },
+    "/v1/person/update": {
+      "post": {
+        "operationId": "moviesPersonsServiceV1_UpdatePerson",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "404": {
+            "description": "Returned when person not found",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "500": {
+            "description": "Something went wrong.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/admin_movies_persons_serviceUpdatePersonRequest"
+            }
+          }
+        ],
+        "tags": [
+          "moviesPersonsServiceV1"
+        ]
+      }
+    },
+    "/v1/person/update-fields": {
+      "post": {
+        "operationId": "moviesPersonsServiceV1_UpdatePersonFields",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {}
+            }
+          },
+          "404": {
+            "description": "Returned when person not found",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "500": {
+            "description": "Something went wrong.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/admin_movies_persons_serviceUpdatePersonFieldsRequest"
+            }
+          }
+        ],
+        "tags": [
+          "moviesPersonsServiceV1"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "admin_movies_persons_serviceCreatePersonRequest": {
+      "type": "object",
+      "properties": {
+        "fullname_ru": {
+          "type": "string"
+        },
+        "fullname_en": {
+          "type": "string"
+        },
+        "birthday": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sex": {
+          "type": "string"
+        },
+        "photo": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "admin_movies_persons_serviceCreatePersonResponce": {
+      "type": "object",
+      "properties": {
+        "person_id": {
+          "type": "string"
+        }
+      }
+    },
+    "admin_movies_persons_serviceDeletePersonsResponce": {
+      "type": "object",
+      "properties": {
+        "deleted_persons_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "admin_movies_persons_serviceIsPersonExistsResponse": {
+      "type": "object",
+      "properties": {
+        "person_exists": {
+          "type": "boolean"
+        }
+      }
+    },
+    "admin_movies_persons_servicePerson": {
+      "type": "object",
+      "properties": {
+        "fullname_ru": {
+          "type": "string"
+        },
+        "fullname_en": {
+          "type": "string"
+        },
+        "birthday": {
+          "type": "string"
+        },
+        "sex": {
+          "type": "string"
+        },
+        "photo_url": {
+          "type": "string"
+        }
+      }
+    },
+    "admin_movies_persons_servicePersons": {
+      "type": "object",
+      "properties": {
+        "persons": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/admin_movies_persons_servicePerson"
+          }
+        }
+      }
+    },
+    "admin_movies_persons_serviceUpdatePersonFieldsRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "person id for updating"
+        },
+        "fullname_ru": {
+          "type": "string"
+        },
+        "fullname_en": {
+          "type": "string"
+        },
+        "birthday": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sex": {
+          "type": "string"
+        },
+        "photo": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "admin_movies_persons_serviceUpdatePersonRequest": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "title": "person id for updating"
+        },
+        "fullname_ru": {
+          "type": "string"
+        },
+        "fullname_en": {
+          "type": "string"
+        },
+        "birthday": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sex": {
+          "type": "string"
+        },
+        "photo": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "@type": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": {}
+    },
+    "rpcStatus": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,148 @@
+syntax= "proto3";
+
+package admin_movies_persons_service;
+import "admin_movies_persons_service_v1_messages.proto";
+option go_package = "admin_movies_persons_service/v1/protos";
+import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
+import "google/protobuf/empty.proto";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+    schemes: HTTP;
+    //schemes: HTTPS;
+    consumes: "application/json";
+    produces: "application/json";
+
+    info: {
+        title: "Admin panel for movies persons service";
+        version: "1.0";
+        contact: {
+            name: "Falokut";
+            url: "https://github.com/Falokut";
+            email: "timur.sinelnik@yandex.ru";
+        };
+    }
+    responses: {
+		key: "404";
+		value: {
+			description: "Returned when the resource does not exist.";
+			schema: {
+				json_schema: {
+					ref: "#/definitions/rpcStatus";
+				}
+			}
+		}
+	}
+    responses: {
+		key: "500";
+		value: {
+			description: "Something went wrong.";
+			schema: {
+				json_schema: {
+					ref: "#/definitions/rpcStatus";
+				}
+			}
+		}
+	}
+};
+
+service moviesPersonsServiceV1 {
+    rpc GetPersons(GetPersonsRequest) returns(Persons) {
+        option (google.api.http) = {
+            get: "/v1/person"
+        };
+    }
+    rpc SearchPerson(SearchPersonRequest) returns(Persons) {
+        option (google.api.http) = {
+            get: "/v1/person/search"
+        };
+    }
+
+    rpc IsPersonExists(IsPersonExistsRequest) returns(IsPersonExistsResponse) {
+        option (google.api.http) = {
+            get: "/v1/person/exist"
+        };
+    }
+    
+    rpc UpdatePersonFields(UpdatePersonFieldsRequest) returns(google.protobuf.Empty){
+        option (google.api.http) = {
+            // must be patch, but patch doesn't work stable
+            post: "/v1/person/update-fields"
+            body: "*"
+        };
+
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            responses: {
+                key: "404"
+                value: {
+                    description: "Returned when person not found"
+                    schema: {
+                        json_schema: {
+                            ref: "#/definitions/rpcStatus";
+                        }
+                    }
+                }
+            };
+        };
+    }
+
+    rpc UpdatePerson(UpdatePersonRequest) returns(google.protobuf.Empty){
+        option (google.api.http) = {
+            post: "/v1/person/update"
+            body: "*"
+        };
+
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            responses: {
+                key: "404"
+                value: {
+                    description: "Returned when person not found"
+                    schema: {
+                        json_schema: {
+                            ref: "#/definitions/rpcStatus";
+                        }
+                    }
+                }
+            };
+        };
+    }
+
+    rpc CreatePerson(CreatePersonRequest) returns(CreatePersonResponce){
+        option (google.api.http) = {
+            post: "/v1/person"
+            body: "*"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            responses: {
+                key: "409"
+                value: {
+                    description: "Returned when person already (when all fields exept photo same) exist"
+                    schema: {
+                        json_schema: {
+                            ref: "#/definitions/rpcStatus";
+                        }
+                    }
+                }
+            };
+        };
+    }
+
+    rpc DeletePersons(DeletePersonsRequest) returns(DeletePersonsResponce) {
+        option (google.api.http) = {
+            delete: "/v1/person"
+        };
+        option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+            responses: {
+                key: "404"
+                value: {
+                    description: "Returned when person not found"
+                    schema: {
+                        json_schema: {
+                            ref: "#/definitions/rpcStatus";
+                        }
+                    }
+                }
+            };
+        };
+    }
+}

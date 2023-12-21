@@ -22,7 +22,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - PGUSER=${PGUSER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=movies_persons_db
+      - POSTGRES_DB=movies_persons
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready"]
       interval: 10s

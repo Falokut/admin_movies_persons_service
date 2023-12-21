@@ -43,28 +43,25 @@ func (s *MoviesPersonsService) GetPersons(ctx context.Context,
 	span, ctx := opentracing.StartSpanFromContext(ctx, "MoviesPersonsService.GetPersons")
 	defer span.Finish()
 
-	if in.PersonsIDs != "" {
-		in.PersonsIDs = strings.TrimSpace(strings.ReplaceAll(in.PersonsIDs, `"`, ""))
-		if err := validateParams(in); err != nil {
-			return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInvalidParam, "")
-		}
-	}
-
-	if err := validateLimitAndOffset(in.Page, in.Limit); err != nil {
+	offset := in.Limit * (in.Page - 1)
+	if err := validateLimitAndPage(in.Page, in.Limit); err != nil {
 		span.SetTag("grpc.status", status.Code(err))
 		ext.LogError(span, err)
 		return nil, err
 	}
 
-	ids := strings.Split(in.PersonsIDs, ",")
-	offset := in.Limit * (in.Page - 1)
-
 	var persons []repository.Person
 	var err error
-	if len(ids) > 0 {
-		persons, err = s.repo.GetPersons(ctx, ids, in.Limit, offset)
-	} else {
+	if in.PersonsIDs == "" {
 		persons, err = s.repo.GetAllPersons(ctx, in.Limit, offset)
+	} else {
+		in.PersonsIDs = strings.TrimSpace(strings.ReplaceAll(in.PersonsIDs, `"`, ""))
+		if err := checkParam(in.PersonsIDs); err != nil {
+			return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInvalidParam, "")
+		}
+
+		ids := strings.Split(in.PersonsIDs, ",")
+		persons, err = s.repo.GetPersons(ctx, ids, in.Limit, offset)
 	}
 
 	if errors.Is(err, repository.ErrNotFound) {
@@ -84,7 +81,7 @@ func (s *MoviesPersonsService) SearchPerson(ctx context.Context,
 
 	in.PersonName = strings.ReplaceAll(in.PersonName, "'", "")
 
-	if err := validateLimitAndOffset(in.Page, in.Limit); err != nil {
+	if err := validateLimitAndPage(in.Page, in.Limit); err != nil {
 		span.SetTag("grpc.status", status.Code(err))
 		ext.LogError(span, err)
 		return nil, err
@@ -118,9 +115,9 @@ func (s *MoviesPersonsService) UpdatePersonFields(ctx context.Context, in *movie
 	var photoID = ""
 	if len(in.Photo) > 0 {
 		photoID, err = s.imagesService.UploadImage(ctx, in.Photo)
-		span.SetTag("grpc.status", grpc_errors.GetGrpcCode(err))
-		ext.LogError(span, err)
 		if err != nil {
+			span.SetTag("grpc.status", grpc_errors.GetGrpcCode(err))
+			ext.LogError(span, err)
 			return nil, err
 		}
 	}
@@ -201,9 +198,9 @@ func (s *MoviesPersonsService) CreatePerson(ctx context.Context,
 	var photoID = ""
 	if len(in.Photo) > 0 {
 		photoID, err = s.imagesService.UploadImage(ctx, in.Photo)
-		span.SetTag("grpc.status", status.Code(err))
-		ext.LogError(span, err)
 		if err != nil {
+			span.SetTag("grpc.status", status.Code(err))
+			ext.LogError(span, err)
 			return nil, err
 		}
 	}
@@ -247,9 +244,9 @@ func (s *MoviesPersonsService) UpdatePerson(ctx context.Context, in *movies_pers
 	var photoID = ""
 	if len(in.Photo) > 0 {
 		photoID, err = s.imagesService.UploadImage(ctx, in.Photo)
-		span.SetTag("grpc.status", status.Code(err))
-		ext.LogError(span, err)
 		if err != nil {
+			span.SetTag("grpc.status", status.Code(err))
+			ext.LogError(span, err)
 			return nil, err
 		}
 	}

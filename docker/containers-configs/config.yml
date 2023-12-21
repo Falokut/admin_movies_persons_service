@@ -4,7 +4,7 @@ healthcheck_port: 7001
 image_storage_service:
   storage_addr: "host.docker.internal:81"
   base_photo_url: "http://localhost:80/image"
-  pictures_category: "person_photo"
+  photo_category: "person_photo"
 
 image_processing_service:
   addr: "host.docker.internal:81"
@@ -26,8 +26,9 @@ db_config:
   host: "movies_persons_db"
   port: "5432"
   username: "admin_movies_persons_service"
-  db_name: "movies_persons_db"
+  db_name: "movies_persons"
   ssl_mode: "disable"
+  max_open_connections: 50
 
 jaeger:
   service_name: "Admin_Movies_Persons_Service"

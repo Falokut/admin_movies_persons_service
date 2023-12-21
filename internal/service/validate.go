@@ -22,7 +22,7 @@ func validateParams(param *movies_persons_service.GetPersonsRequest) error {
 	return nil
 }
 
-func validateLimitAndOffset(page, limit int32) error {
+func validateLimitAndPage(page, limit int32) error {
 	if page <= 0 {
 		return fmt.Errorf("%s error: %w", "page must be > 0", ErrInvalidArgument)
 	}

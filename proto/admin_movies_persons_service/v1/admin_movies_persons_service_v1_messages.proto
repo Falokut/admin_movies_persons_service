@@ -17,7 +17,15 @@ message SearchPersonRequest {
     // must be > 0
     int32 page = 7;
 }
+message SearchPersonByNameRequest {
+  string Name = 1[json_name = "name"];
+  
+  // must be in range 10-100
+  int32 limit = 2;
 
+  // must be > 0
+  int32 page = 3;
+}
 message DeletePersonsResponce {
   repeated string DeletedPersonIDs = 1[json_name="deleted_persons_ids"];
 }

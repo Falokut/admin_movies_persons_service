@@ -93,6 +93,26 @@ func (r *personsRepository) IsPersonAlreadyExists(ctx context.Context, person Se
 	return true, ids, nil
 }
 
+func (r *personsRepository) SearchPersonByName(ctx context.Context, name string, limit, offset int32) ([]Person, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "personsRepository.SearchPersonByName")
+	defer span.Finish()
+
+	var err error
+	defer span.SetTag("error", err != nil)
+
+	query := fmt.Sprintf("SELECT * FROM %s WHERE LOWER(fullname_ru) LIKE($1)"+
+		" OR LOWER(fullname_en) LIKE('$1') ORDER BY id LIMIT %d OFFSET %d;", personsTableName, limit, offset)
+
+	var persons []Person
+	err = r.db.SelectContext(ctx, &persons, query, strings.ToLower(name)+"%")
+	if errors.Is(err, sql.ErrNoRows) {
+		return []Person{}, ErrNotFound
+	} else if err != nil {
+		return []Person{}, err
+	}
+	return persons, nil
+}
+
 func (r *personsRepository) SearchPerson(ctx context.Context, person SearchPersonParam, limit, offset int32) ([]Person, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "personsRepository.SearchPerson")
 	defer span.Finish()

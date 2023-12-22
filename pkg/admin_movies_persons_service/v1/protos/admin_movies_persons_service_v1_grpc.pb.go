@@ -25,6 +25,7 @@ const _ = grpc.SupportPackageIsVersion7
 type MoviesPersonsServiceV1Client interface {
 	GetPersons(ctx context.Context, in *GetPersonsRequest, opts ...grpc.CallOption) (*Persons, error)
 	SearchPerson(ctx context.Context, in *SearchPersonRequest, opts ...grpc.CallOption) (*Persons, error)
+	SearchPersonByName(ctx context.Context, in *SearchPersonByNameRequest, opts ...grpc.CallOption) (*Persons, error)
 	IsPersonWithIDExists(ctx context.Context, in *IsPersonWithIDExistsRequest, opts ...grpc.CallOption) (*IsPersonWithIDExistsResponse, error)
 	IsPersonExists(ctx context.Context, in *IsPersonExistsRequest, opts ...grpc.CallOption) (*IsPersonExistsResponse, error)
 	UpdatePersonFields(ctx context.Context, in *UpdatePersonFieldsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
@@ -53,6 +54,15 @@ func (c *moviesPersonsServiceV1Client) GetPersons(ctx context.Context, in *GetPe
 func (c *moviesPersonsServiceV1Client) SearchPerson(ctx context.Context, in *SearchPersonRequest, opts ...grpc.CallOption) (*Persons, error) {
 	out := new(Persons)
 	err := c.cc.Invoke(ctx, "/admin_movies_persons_service.moviesPersonsServiceV1/SearchPerson", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *moviesPersonsServiceV1Client) SearchPersonByName(ctx context.Context, in *SearchPersonByNameRequest, opts ...grpc.CallOption) (*Persons, error) {
+	out := new(Persons)
+	err := c.cc.Invoke(ctx, "/admin_movies_persons_service.moviesPersonsServiceV1/SearchPersonByName", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -119,6 +129,7 @@ func (c *moviesPersonsServiceV1Client) DeletePersons(ctx context.Context, in *De
 type MoviesPersonsServiceV1Server interface {
 	GetPersons(context.Context, *GetPersonsRequest) (*Persons, error)
 	SearchPerson(context.Context, *SearchPersonRequest) (*Persons, error)
+	SearchPersonByName(context.Context, *SearchPersonByNameRequest) (*Persons, error)
 	IsPersonWithIDExists(context.Context, *IsPersonWithIDExistsRequest) (*IsPersonWithIDExistsResponse, error)
 	IsPersonExists(context.Context, *IsPersonExistsRequest) (*IsPersonExistsResponse, error)
 	UpdatePersonFields(context.Context, *UpdatePersonFieldsRequest) (*emptypb.Empty, error)
@@ -137,6 +148,9 @@ func (UnimplementedMoviesPersonsServiceV1Server) GetPersons(context.Context, *Ge
 }
 func (UnimplementedMoviesPersonsServiceV1Server) SearchPerson(context.Context, *SearchPersonRequest) (*Persons, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SearchPerson not implemented")
+}
+func (UnimplementedMoviesPersonsServiceV1Server) SearchPersonByName(context.Context, *SearchPersonByNameRequest) (*Persons, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchPersonByName not implemented")
 }
 func (UnimplementedMoviesPersonsServiceV1Server) IsPersonWithIDExists(context.Context, *IsPersonWithIDExistsRequest) (*IsPersonWithIDExistsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IsPersonWithIDExists not implemented")
@@ -202,6 +216,24 @@ func _MoviesPersonsServiceV1_SearchPerson_Handler(srv interface{}, ctx context.C
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(MoviesPersonsServiceV1Server).SearchPerson(ctx, req.(*SearchPersonRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _MoviesPersonsServiceV1_SearchPersonByName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchPersonByNameRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MoviesPersonsServiceV1Server).SearchPersonByName(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/admin_movies_persons_service.moviesPersonsServiceV1/SearchPersonByName",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MoviesPersonsServiceV1Server).SearchPersonByName(ctx, req.(*SearchPersonByNameRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -328,6 +360,10 @@ var MoviesPersonsServiceV1_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SearchPerson",
 			Handler:    _MoviesPersonsServiceV1_SearchPerson_Handler,
+		},
+		{
+			MethodName: "SearchPersonByName",
+			Handler:    _MoviesPersonsServiceV1_SearchPersonByName_Handler,
 		},
 		{
 			MethodName: "IsPersonWithIDExists",

@@ -56,9 +56,10 @@ type PersonsRepository interface {
 	GetPersons(ctx context.Context, ids []string, limit, offset int32) ([]Person, error)
 	GetAllPersons(ctx context.Context, limit, offset int32) ([]Person, error)
 	DeletePersons(ctx context.Context, ids []string) ([]string, error)
-	SearchPerson(ctx context.Context, name SearchPersonParam, limit, offset int32) ([]Person, error)
+	SearchPerson(ctx context.Context, person SearchPersonParam, limit, offset int32) ([]Person, error)
 	UpdatePerson(ctx context.Context, id string, toUpdate UpdatePersonParam, excludeDefaultValues bool) error
 	CreatePerson(ctx context.Context, person CreatePersonParam) (string, error)
 	IsPersonWithIDExist(ctx context.Context, id string) (bool, error)
 	IsPersonAlreadyExists(ctx context.Context, person SearchPersonParam) (bool, []string, error)
+	SearchPersonByName(ctx context.Context, name string, limit, offset int32) ([]Person, error)
 }

@@ -183,6 +183,7 @@ func (s *MoviesPersonsService) IsPersonWithIDExists(ctx context.Context,
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInternal, err.Error())
 	}
 
+	span.SetTag("grpc.status", codes.OK)
 	return &movies_persons_service.IsPersonWithIDExistsResponse{PersonExists: exists}, nil
 }
 
@@ -202,6 +203,7 @@ func (s *MoviesPersonsService) IsPersonExists(ctx context.Context,
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInternal, err.Error())
 	}
 
+	span.SetTag("grpc.status", codes.OK)
 	return &movies_persons_service.IsPersonExistsResponse{PersonExists: exists, FindedPersonsIDs: ids}, nil
 }
 
@@ -287,6 +289,32 @@ func (s *MoviesPersonsService) UpdatePerson(ctx context.Context, in *movies_pers
 
 	span.SetTag("grpc.status", codes.OK)
 	return &emptypb.Empty{}, nil
+}
+
+func (s *MoviesPersonsService) SearchPersonByName(ctx context.Context, in *movies_persons_service.SearchPersonByNameRequest) (*movies_persons_service.Persons, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "MoviesPersonsService.SearchPersonByNameRequest")
+	defer span.Finish()
+
+	if in.Name == "" {
+		return nil, s.errorHandler.createExtendedErrorResponceWithSpan(span, ErrInvalidArgument, "", "name mustn't be empty")
+	}
+
+	if err := validateLimitAndPage(in.Page, in.Limit); err != nil {
+		span.SetTag("grpc.status", status.Code(err))
+		ext.LogError(span, err)
+		return nil, err
+	}
+
+	offset := in.Limit * (in.Page - 1)
+	persons, err := s.repo.SearchPersonByName(ctx, in.Name, in.Limit, offset)
+	if errors.Is(err, repository.ErrNotFound) {
+		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrNotFound, "")
+	} else if err != nil {
+		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInternal, err.Error())
+	}
+
+	span.SetTag("grpc.status", codes.OK)
+	return s.convertPersons(ctx, persons), nil
 }
 
 func (s *MoviesPersonsService) convertPersons(ctx context.Context,

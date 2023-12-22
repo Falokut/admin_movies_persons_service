@@ -8,7 +8,8 @@ import (
 	"reflect"
 	"strings"
 
-	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/jackc/pgx/v5"
+	stdlib "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
 	"github.com/opentracing/opentracing-go"
 )
@@ -25,16 +26,15 @@ func NewPersonsRepository(db *sqlx.DB) *personsRepository {
 	return &personsRepository{db: db}
 }
 
-func formatBool(b bool) string {
-	if b {
-		return "yes"
-	}
-	return "no"
-}
-
 func NewPostgreDB(cfg DBConfig) (*sqlx.DB, error) {
-	conStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s, binary_parameters=%s",
-		cfg.Host, cfg.Port, cfg.Username, cfg.Password, cfg.DBName, cfg.SSLMode, formatBool(cfg.BinaryParameters))
+	conStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
+		cfg.Host, cfg.Port, cfg.Username, cfg.Password, cfg.DBName, cfg.SSLMode)
+
+	if !cfg.EnablePreparedStatements {
+		stdlib.RegisterConnConfig(&pgx.ConnConfig{
+			DefaultQueryExecMode: pgx.QueryExecModeSimpleProtocol,
+		})
+	}
 
 	return sqlx.Connect("pgx", conStr)
 }
@@ -300,8 +300,4 @@ func isDefaultValue(field interface{}) bool {
 	fieldVal := reflect.ValueOf(field)
 
 	return !fieldVal.IsValid() || fieldVal.Interface() == reflect.Zero(fieldVal.Type()).Interface()
-}
-
-func (r *personsRepository) getLikeStatementForName(name string) string {
-	return fmt.Sprintf("LOWER(fullname_ru) LIKE('%[1]s%[2]s') OR LOWER(fullname_en) LIKE('%[1]s%[2]s')", name, "%")
 }

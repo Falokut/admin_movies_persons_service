@@ -8,13 +8,13 @@ import (
 )
 
 type DBConfig struct {
-	Host             string `yaml:"host" env:"DB_HOST"`
-	Port             string `yaml:"port" env:"DB_PORT"`
-	Username         string `yaml:"username" env:"DB_USERNAME"`
-	Password         string `yaml:"password" env:"DB_PASSWORD"`
-	DBName           string `yaml:"db_name" env:"DB_NAME"`
-	SSLMode          string `yaml:"ssl_mode" env:"DB_SSL_MODE"`
-	BinaryParameters bool   `yaml:"enable_binary_parameters" env:"DB_ENABLE_BINARY_PARAMETERS"`
+	Host                     string `yaml:"host" env:"DB_HOST"`
+	Port                     string `yaml:"port" env:"DB_PORT"`
+	Username                 string `yaml:"username" env:"DB_USERNAME"`
+	Password                 string `yaml:"password" env:"DB_PASSWORD"`
+	DBName                   string `yaml:"db_name" env:"DB_NAME"`
+	SSLMode                  string `yaml:"ssl_mode" env:"DB_SSL_MODE"`
+	EnablePreparedStatements bool   `yaml:"enable_prepared_statements" env:"DB_ENABLE_PREPARED_STATEMENTS"`
 }
 
 type Person struct {

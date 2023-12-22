@@ -120,7 +120,7 @@ func getListenServerConfig(cfg *config.Config) server.Config {
 		RegisterRestHandlerServer: func(ctx context.Context, mux *runtime.ServeMux, service any) error {
 			serv, ok := service.(movies_persons_service.MoviesPersonsServiceV1Server)
 			if !ok {
-				return errors.New("can't convert")
+				return errors.New(" can't convert")
 			}
 			return movies_persons_service.RegisterMoviesPersonsServiceV1HandlerServer(context.Background(),
 				mux, serv)

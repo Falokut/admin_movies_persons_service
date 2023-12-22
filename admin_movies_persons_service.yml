@@ -21,7 +21,6 @@ services:
       - movies_persons_db_network
     environment:
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_ENABLE_BINARY_PARAMETERS: true
     depends_on:
       movies_persons_pool:
         condition: service_started

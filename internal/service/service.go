@@ -174,7 +174,7 @@ func (s *MoviesPersonsService) DeletePersons(ctx context.Context,
 }
 
 func (s *MoviesPersonsService) IsPersonWithIDExists(ctx context.Context,
-	in *movies_persons_service.IsPersonWithIDExistsRequest) (*movies_persons_service.IsPersonExistsResponse, error) {
+	in *movies_persons_service.IsPersonWithIDExistsRequest) (*movies_persons_service.IsPersonWithIDExistsResponse, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "MoviesPersonsService.IsPersonWithIDExists")
 	defer span.Finish()
 
@@ -183,7 +183,7 @@ func (s *MoviesPersonsService) IsPersonWithIDExists(ctx context.Context,
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInternal, err.Error())
 	}
 
-	return &movies_persons_service.IsPersonExistsResponse{PersonExists: exists}, nil
+	return &movies_persons_service.IsPersonWithIDExistsResponse{PersonExists: exists}, nil
 }
 
 func (s *MoviesPersonsService) IsPersonExists(ctx context.Context,

@@ -35,10 +35,9 @@ services:
     # ports:
     #   - 6439:6432
     networks:
-      - databases_network
       - movies_persons_db_network
     environment:
-      POSTGRESQL_HOST: movies_persons
+      POSTGRESQL_HOST: movies_persons_db
       PGBOUNCER_DATABASE: movies_persons
       POSTGRESQL_USERNAME: ${POSTGRES_USER}
       POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}

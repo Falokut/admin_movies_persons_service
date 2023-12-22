@@ -172,7 +172,7 @@
         ]
       }
     },
-    "/v1/person/exist": {
+    "/v1/person/exists": {
       "get": {
         "operationId": "moviesPersonsServiceV1_IsPersonExists",
         "responses": {
@@ -180,6 +180,67 @@
             "description": "A successful response.",
             "schema": {
               "$ref": "#/definitions/admin_movies_persons_serviceIsPersonExistsResponse"
+            }
+          },
+          "404": {
+            "description": "Returned when the resource does not exist.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "500": {
+            "description": "Something went wrong.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "fullname_ru",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "fullname_en",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "birthday",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "sex",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "moviesPersonsServiceV1"
+        ]
+      }
+    },
+    "/v1/person/id-exists": {
+      "get": {
+        "operationId": "moviesPersonsServiceV1_IsPersonWithIDExists",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/admin_movies_persons_serviceIsPersonWithIDExistsResponse"
             }
           },
           "404": {
@@ -245,10 +306,36 @@
         },
         "parameters": [
           {
-            "name": "person_name",
+            "name": "fullname_ru",
             "in": "query",
             "required": false,
             "type": "string"
+          },
+          {
+            "name": "fullname_en",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "birthday",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "date-time"
+          },
+          {
+            "name": "sex",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "photo",
+            "in": "query",
+            "required": false,
+            "type": "string",
+            "format": "byte"
           },
           {
             "name": "limit",
@@ -406,6 +493,20 @@
       }
     },
     "admin_movies_persons_serviceIsPersonExistsResponse": {
+      "type": "object",
+      "properties": {
+        "person_exists": {
+          "type": "boolean"
+        },
+        "finded_persons_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "admin_movies_persons_serviceIsPersonWithIDExistsResponse": {
       "type": "object",
       "properties": {
         "person_exists": {

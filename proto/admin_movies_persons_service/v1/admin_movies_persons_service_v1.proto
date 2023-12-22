@@ -58,9 +58,14 @@ service moviesPersonsServiceV1 {
         };
     }
 
+    rpc IsPersonWithIDExists(IsPersonWithIDExistsRequest) returns(IsPersonWithIDExistsResponse) {
+        option (google.api.http) = {
+            get: "/v1/person/id-exists"
+        };
+    }
     rpc IsPersonExists(IsPersonExistsRequest) returns(IsPersonExistsResponse) {
         option (google.api.http) = {
-            get: "/v1/person/exist"
+            get: "/v1/person/exists"
         };
     }
     

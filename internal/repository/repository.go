@@ -8,13 +8,13 @@ import (
 )
 
 type DBConfig struct {
-	Host         string `yaml:"host" env:"DB_HOST"`
-	Port         string `yaml:"port" env:"DB_PORT"`
-	Username     string `yaml:"username" env:"DB_USERNAME"`
-	Password     string `yaml:"password" env:"DB_PASSWORD"`
-	DBName       string `yaml:"db_name" env:"DB_NAME"`
-	SSLMode      string `yaml:"ssl_mode" env:"DB_SSL_MODE"`
-	MaxOpenConns int    `yaml:"max_open_connections" env:"MAX_OPEN_CONNECTIONS"`
+	Host             string `yaml:"host" env:"DB_HOST"`
+	Port             string `yaml:"port" env:"DB_PORT"`
+	Username         string `yaml:"username" env:"DB_USERNAME"`
+	Password         string `yaml:"password" env:"DB_PASSWORD"`
+	DBName           string `yaml:"db_name" env:"DB_NAME"`
+	SSLMode          string `yaml:"ssl_mode" env:"DB_SSL_MODE"`
+	BinaryParameters bool   `yaml:"enable_binary_parameters" env:"DB_ENABLE_BINARY_PARAMETERS"`
 }
 
 type Person struct {
@@ -34,7 +34,7 @@ type UpdatePersonParam struct {
 	PhotoID    string    `db:"photo_id"`
 }
 
-type IsPersonExistParam struct {
+type SearchPersonParam struct {
 	FullnameRU string    `db:"fullname_ru"`
 	FullnameEN string    `db:"fullname_en"`
 	Birthday   time.Time `db:"birthday"`
@@ -50,14 +50,15 @@ type CreatePersonParam struct {
 }
 
 var ErrNotFound = errors.New("entity not found")
+var ErrInvalidArgument = errors.New("invalid input data")
 
 type PersonsRepository interface {
 	GetPersons(ctx context.Context, ids []string, limit, offset int32) ([]Person, error)
 	GetAllPersons(ctx context.Context, limit, offset int32) ([]Person, error)
 	DeletePersons(ctx context.Context, ids []string) ([]string, error)
-	SearchPerson(ctx context.Context, name string, limit, offset int32) ([]Person, error)
+	SearchPerson(ctx context.Context, name SearchPersonParam, limit, offset int32) ([]Person, error)
 	UpdatePerson(ctx context.Context, id string, toUpdate UpdatePersonParam, excludeDefaultValues bool) error
 	CreatePerson(ctx context.Context, person CreatePersonParam) (string, error)
 	IsPersonWithIDExist(ctx context.Context, id string) (bool, error)
-	IsPersonAlreadyExists(ctx context.Context, person IsPersonExistParam) (bool, []string, error)
+	IsPersonAlreadyExists(ctx context.Context, person SearchPersonParam) (bool, []string, error)
 }

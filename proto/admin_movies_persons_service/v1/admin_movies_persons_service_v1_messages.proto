@@ -5,13 +5,17 @@ option go_package = "admin_movies_persons_service/v1/protos";
 import "google/protobuf/timestamp.proto";
 
 message SearchPersonRequest {
-    string PersonName = 1[json_name="person_name"];
+    optional string fullnameRU =1[json_name="fullname_ru"];
+    optional string fullnameEN =2[json_name="fullname_en"];
+    optional google.protobuf.Timestamp birthday = 3;
+    optional string sex = 4;
+    optional bytes photo = 5[json_name="photo"];
 
     // must be in range 10-100
-    int32 limit = 2;
+    int32 limit = 6;
   
     // must be > 0
-    int32 page = 3;
+    int32 page = 7;
 }
 
 message DeletePersonsResponce {
@@ -66,13 +70,26 @@ message DeletePersonsRequest {
   string PersonsIDs = 1[json_name="persons_ids"];
 }
 
-message IsPersonExistsResponse {
+message IsPersonWithIDExistsResponse {
   bool PersonExists = 1[json_name="person_exists"];
 }
 
-message IsPersonExistsRequest {
+message IsPersonWithIDExistsRequest {
   string PersonID =  1[json_name="person_id"];
 }
+
+message IsPersonExistsResponse {
+  bool PersonExists = 1[json_name="person_exists"];
+  repeated string FindedPersonsIDs = 2[json_name="finded_persons_ids"];
+}
+
+message IsPersonExistsRequest {
+  optional string fullnameRU =1[json_name="fullname_ru"];
+  optional string fullnameEN =2[json_name="fullname_en"];
+  optional google.protobuf.Timestamp birthday = 3;
+  optional string sex = 4;
+}
+
 
 message Person {
   string fullnameRU =1[json_name="fullname_ru"];

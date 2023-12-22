@@ -20,7 +20,7 @@ services:
     environment :
       - PGDATA=/var/lib/postgresql/data
       - POSTGRES_USER=${POSTGRES_USER}
-      - PGUSER=${PGUSER}
+      - PGUSER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=movies_persons
     healthcheck:
@@ -28,3 +28,23 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  movies_persons_pool:
+    image: bitnami/pgbouncer
+    restart: unless-stopped
+    # ports:
+    #   - 6439:6432
+    networks:
+      - databases_network
+      - movies_persons_db_network
+    environment:
+      POSTGRESQL_HOST: movies_persons
+      PGBOUNCER_DATABASE: movies_persons
+      POSTGRESQL_USERNAME: ${POSTGRES_USER}
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./docker/pgbouncer/pgbouncer.ini:/bitnami/pgbouncer/conf/pgbouncer.ini
+      - ./docker/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt
+    depends_on:
+      movies_persons_db:
+        condition: service_healthy

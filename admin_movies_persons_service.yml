@@ -21,9 +21,10 @@ services:
       - movies_persons_db_network
     environment:
       DB_PASSWORD: ${DB_PASSWORD}
+      DB_ENABLE_BINARY_PARAMETERS: true
     depends_on:
-      movies_persons_db:
-        condition: service_healthy
+      movies_persons_pool:
+        condition: service_started
     healthcheck:
       test: wget --no-verbose --tries=1 --spider 'http://localhost:7001/healthcheck' || exit 1
       interval: 40s

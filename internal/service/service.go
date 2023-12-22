@@ -79,8 +79,6 @@ func (s *MoviesPersonsService) SearchPerson(ctx context.Context,
 	span, ctx := opentracing.StartSpanFromContext(ctx, "MoviesPersonsService.SearchPerson")
 	defer span.Finish()
 
-	in.PersonName = strings.ReplaceAll(in.PersonName, "'", "")
-
 	if err := validateLimitAndPage(in.Page, in.Limit); err != nil {
 		span.SetTag("grpc.status", status.Code(err))
 		ext.LogError(span, err)
@@ -89,9 +87,16 @@ func (s *MoviesPersonsService) SearchPerson(ctx context.Context,
 
 	offset := in.Limit * (in.Page - 1)
 
-	persons, err := s.repo.SearchPerson(ctx, in.PersonName, in.Limit, offset)
+	persons, err := s.repo.SearchPerson(ctx, repository.SearchPersonParam{
+		FullnameRU: in.GetFullnameRU(),
+		FullnameEN: in.GetFullnameEN(),
+		Birthday:   getTimeFromTimestamp(in.Birthday),
+		Sex:        in.GetSex(),
+	}, in.Limit, offset)
 
-	if errors.Is(err, repository.ErrNotFound) {
+	if errors.Is(err, repository.ErrInvalidArgument) {
+		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInvalidArgument, "")
+	} else if errors.Is(err, repository.ErrNotFound) {
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrNotFound, "")
 	} else if err != nil {
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInternal, err.Error())
@@ -105,7 +110,8 @@ func (s *MoviesPersonsService) UpdatePersonFields(ctx context.Context, in *movie
 	span, ctx := opentracing.StartSpanFromContext(ctx, "MoviesPersonsService.UpdatePersonFields")
 	defer span.Finish()
 
-	exists, err := s.IsPersonExists(ctx, &movies_persons_service.IsPersonExistsRequest{PersonID: in.ID})
+	exists, err := s.IsPersonWithIDExists(ctx,
+		&movies_persons_service.IsPersonWithIDExistsRequest{PersonID: in.ID})
 	if err != nil {
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInternal, err.Error())
 	} else if !exists.PersonExists {
@@ -167,9 +173,9 @@ func (s *MoviesPersonsService) DeletePersons(ctx context.Context,
 	return &movies_persons_service.DeletePersonsResponce{DeletedPersonIDs: ids}, nil
 }
 
-func (s *MoviesPersonsService) IsPersonExists(ctx context.Context,
-	in *movies_persons_service.IsPersonExistsRequest) (*movies_persons_service.IsPersonExistsResponse, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "MoviesPersonsService.IsPersonExists")
+func (s *MoviesPersonsService) IsPersonWithIDExists(ctx context.Context,
+	in *movies_persons_service.IsPersonWithIDExistsRequest) (*movies_persons_service.IsPersonExistsResponse, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "MoviesPersonsService.IsPersonWithIDExists")
 	defer span.Finish()
 
 	exists, err := s.repo.IsPersonWithIDExist(ctx, in.PersonID)
@@ -180,18 +186,42 @@ func (s *MoviesPersonsService) IsPersonExists(ctx context.Context,
 	return &movies_persons_service.IsPersonExistsResponse{PersonExists: exists}, nil
 }
 
+func (s *MoviesPersonsService) IsPersonExists(ctx context.Context,
+	in *movies_persons_service.IsPersonExistsRequest) (*movies_persons_service.IsPersonExistsResponse, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "MoviesPersonsService.IsPersonExists")
+	defer span.Finish()
+
+	exists, ids, err := s.repo.IsPersonAlreadyExists(ctx, repository.SearchPersonParam{
+		FullnameRU: in.GetFullnameRU(),
+		FullnameEN: in.GetFullnameEN(),
+		Birthday:   getTimeFromTimestamp(in.Birthday),
+		Sex:        in.GetSex(),
+	})
+
+	if err != nil {
+		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInternal, err.Error())
+	}
+
+	return &movies_persons_service.IsPersonExistsResponse{PersonExists: exists, FindedPersonsIDs: ids}, nil
+}
+
 func (s *MoviesPersonsService) CreatePerson(ctx context.Context,
 	in *movies_persons_service.CreatePersonRequest) (*movies_persons_service.CreatePersonResponce, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "MoviesPersonsService.CreatePerson")
 	defer span.Finish()
 
-	exists, ids, err := s.IsPersonWithFieldsExists(ctx, in)
+	res, err := s.IsPersonExists(ctx, &movies_persons_service.IsPersonExistsRequest{
+		FullnameRU: &in.FullnameRU,
+		FullnameEN: in.FullnameEN,
+		Birthday:   in.Birthday,
+		Sex:        in.Sex,
+	})
 	if err != nil {
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInternal, err.Error())
-	} else if exists {
+	} else if res.PersonExists {
 		msg := fmt.Sprintf("finded persons with ids: %s,"+
 			"If this list does not contain the id of the person you"+
-			"want to add, add more information about the person", strings.Join(ids, ", "))
+			"want to add, add more information about the person", strings.Join(res.FindedPersonsIDs, ", "))
 		return nil, s.errorHandler.createExtendedErrorResponceWithSpan(span, ErrAlreadyExists, "", msg)
 	}
 
@@ -220,21 +250,12 @@ func (s *MoviesPersonsService) CreatePerson(ctx context.Context,
 	return &movies_persons_service.CreatePersonResponce{PersonID: id}, nil
 }
 
-func (s *MoviesPersonsService) IsPersonWithFieldsExists(ctx context.Context,
-	in *movies_persons_service.CreatePersonRequest) (bool, []string, error) {
-	return s.repo.IsPersonAlreadyExists(ctx, repository.IsPersonExistParam{
-		FullnameRU: in.FullnameRU,
-		FullnameEN: in.GetFullnameEN(),
-		Birthday:   getTimeFromTimestamp(in.GetBirthday()),
-		Sex:        in.GetSex(),
-	})
-}
-
 func (s *MoviesPersonsService) UpdatePerson(ctx context.Context, in *movies_persons_service.UpdatePersonRequest) (*emptypb.Empty, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "MoviesPersonsService.UpdatePerson")
 	defer span.Finish()
 
-	exists, err := s.IsPersonExists(ctx, &movies_persons_service.IsPersonExistsRequest{PersonID: in.ID})
+	exists, err := s.IsPersonWithIDExists(ctx,
+		&movies_persons_service.IsPersonWithIDExistsRequest{PersonID: in.ID})
 	if err != nil {
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInternal, err.Error())
 	} else if !exists.PersonExists {

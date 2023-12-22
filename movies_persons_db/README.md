@@ -3,7 +3,6 @@
 Example env for postgre
 ```env
 POSTGRES_USER=postgres
-PGUSER=postgres
 POSTGRES_PASSWORD=YourPassword
 ```	
 2. Change passwords for roles inside init-up.sql in db folder
@@ -19,3 +18,6 @@ CREATE ROLE admin_movies_persons_service WITH
     LOGIN
     PASSWORD 'YourPasswordForService'; -- Here your password for service
 ```
+
+3. setup pgbouncer:
+* change passwords in docker\pgbouncer\userlist.txt

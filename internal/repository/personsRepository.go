@@ -25,15 +25,18 @@ func NewPersonsRepository(db *sqlx.DB) *personsRepository {
 	return &personsRepository{db: db}
 }
 
-func NewPostgreDB(cfg DBConfig) (*sqlx.DB, error) {
-	conStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-		cfg.Host, cfg.Port, cfg.Username, cfg.Password, cfg.DBName, cfg.SSLMode)
-	db, err := sqlx.Connect("pgx", conStr)
-	if err != nil {
-		return nil, err
+func formatBool(b bool) string {
+	if b {
+		return "yes"
 	}
-	db.SetMaxOpenConns(cfg.MaxOpenConns)
-	return db, nil
+	return "no"
+}
+
+func NewPostgreDB(cfg DBConfig) (*sqlx.DB, error) {
+	conStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s, binary_parameters=%s",
+		cfg.Host, cfg.Port, cfg.Username, cfg.Password, cfg.DBName, cfg.SSLMode, formatBool(cfg.BinaryParameters))
+
+	return sqlx.Connect("pgx", conStr)
 }
 
 func (r *personsRepository) Shutdown() {
@@ -67,7 +70,7 @@ func (r *personsRepository) GetPersons(ctx context.Context, ids []string, limit,
 
 const defaultIsExistLimit = 2
 
-func (r *personsRepository) IsPersonAlreadyExists(ctx context.Context, person IsPersonExistParam) (bool, []string, error) {
+func (r *personsRepository) IsPersonAlreadyExists(ctx context.Context, person SearchPersonParam) (bool, []string, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "personsRepository.IsPersonAlreadyExists")
 	defer span.Finish()
 
@@ -76,7 +79,9 @@ func (r *personsRepository) IsPersonAlreadyExists(ctx context.Context, person Is
 
 	whereStatement, args := r.getWhereStatement(person)
 	query := fmt.Sprintf("SELECT id FROM %s %s LIMIT %d", personsTableName, whereStatement, defaultIsExistLimit)
-
+	if len(args) == 0 {
+		return false, []string{}, ErrInvalidArgument
+	}
 	var ids []string
 	err = r.db.SelectContext(ctx, &ids, query, args...)
 	if err != nil {
@@ -88,19 +93,21 @@ func (r *personsRepository) IsPersonAlreadyExists(ctx context.Context, person Is
 	return true, ids, nil
 }
 
-func (r *personsRepository) SearchPerson(ctx context.Context, name string, limit, offset int32) ([]Person, error) {
+func (r *personsRepository) SearchPerson(ctx context.Context, person SearchPersonParam, limit, offset int32) ([]Person, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "personsRepository.SearchPerson")
 	defer span.Finish()
 
 	var err error
 	defer span.SetTag("error", err != nil)
 
-	name = strings.ToLower(name)
-	query := fmt.Sprintf("SELECT * FROM %s WHERE %s ORDER BY id LIMIT %d OFFSET %d",
-		personsTableName, r.getLikeStatementForName(name), limit, offset)
+	whereStatement, args := r.getWhereStatement(person)
+	query := fmt.Sprintf("SELECT * FROM %s %s ORDER BY id LIMIT %d OFFSET %d", personsTableName, whereStatement, limit, offset)
+	if len(args) == 0 {
+		return []Person{}, ErrInvalidArgument
+	}
 
 	var persons []Person
-	err = r.db.SelectContext(ctx, &persons, query)
+	err = r.db.SelectContext(ctx, &persons, query, args...)
 	if errors.Is(err, sql.ErrNoRows) {
 		return []Person{}, ErrNotFound
 	} else if err != nil {
@@ -219,7 +226,7 @@ func (r *personsRepository) UpdatePerson(ctx context.Context, id string, toUpdat
 	return err
 }
 
-func (r *personsRepository) getWhereStatement(person IsPersonExistParam) (string, []any) {
+func (r *personsRepository) getWhereStatement(person SearchPersonParam) (string, []any) {
 	rv := reflect.ValueOf(person)
 	rt := rv.Type()
 

@@ -60,7 +60,7 @@ if supported values is empty, then any type values are supported
 |password|DB_PASSWORD|string|password for role in database||
 |db_name|DB_NAME|string|database name (database instance)||
 |ssl_mode|DB_SSL_MODE|string|enable or disable ssl mode for database connection|disabled or enabled|
-|max_open_connections|MAX_OPEN_CONNECTIONS|int32|max connections to the database|only positive values of int32|
+|enable_binary_parameters|DB_ENABLE_BINARY_PARAMETERS|bool|enable or disable binary parameters|true or false|
 
 ### Jaeger config
 

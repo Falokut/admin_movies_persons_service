@@ -163,7 +163,8 @@ func (r *personsRepository) DeletePersons(ctx context.Context, ids []string) ([]
 	var err error
 	defer span.SetTag("error", err != nil)
 
-	query, args, err := sqlx.In(fmt.Sprintf("DELETE FROM %s WHERE id IN(?) RETURNING id", personsTableName), ids)
+	query, args, err := sqlx.In(fmt.Sprintf("DELETE FROM %s WHERE id IN(?) RETURNING id",
+		personsTableName), ids)
 	if err != nil {
 		return []string{}, err
 	}
@@ -178,6 +179,32 @@ func (r *personsRepository) DeletePersons(ctx context.Context, ids []string) ([]
 	}
 
 	return deletedIDs, nil
+}
+
+func (r *personsRepository) IsPersonsExists(ctx context.Context, ids []string) ([]int32, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx, "personsRepository.IsPersonsExists")
+	defer span.Finish()
+
+	var err error
+	defer span.SetTag("error", err != nil)
+
+	query, args, err := sqlx.In(fmt.Sprintf("SELECT id FROM %s WHERE id IN(?);",
+		personsTableName), ids)
+	if err != nil {
+		return []int32{}, err
+	}
+
+	query = sqlx.Rebind(sqlx.DOLLAR, query)
+	var foundedIDs = make([]int32, len(ids))
+	err = r.db.SelectContext(ctx, &foundedIDs, query, args...)
+
+	if errors.Is(err, sql.ErrNoRows) {
+		return []int32{}, ErrNotFound
+	} else if err != nil {
+		return []int32{}, err
+	}
+
+	return foundedIDs, nil
 }
 
 func (r *personsRepository) CreatePerson(ctx context.Context, person CreatePersonParam) (string, error) {
@@ -195,7 +222,7 @@ func (r *personsRepository) CreatePerson(ctx context.Context, person CreatePerso
 	if err != nil {
 		return "", err
 	} else if len(id) == 0 {
-		return "", errors.New("something went wrong")
+		return "", errors.New("something went wrong, can't insert")
 	}
 
 	return id[0], nil
@@ -210,8 +237,8 @@ func (r *personsRepository) IsPersonWithIDExist(ctx context.Context, id string) 
 
 	query := fmt.Sprintf("SELECT id FROM %s WHERE id=$1 LIMIT 1;", personsTableName)
 
-	_, err = r.db.ExecContext(ctx, query, id)
-	if errors.Is(err, sql.ErrNoRows) {
+	err = r.db.SelectContext(ctx, &id, query, id)
+	if errors.Is(err, sql.ErrNoRows) || id == "" {
 		return false, nil
 	}
 	if err != nil {

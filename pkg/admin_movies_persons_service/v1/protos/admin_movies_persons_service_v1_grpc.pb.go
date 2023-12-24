@@ -28,6 +28,7 @@ type MoviesPersonsServiceV1Client interface {
 	SearchPersonByName(ctx context.Context, in *SearchPersonByNameRequest, opts ...grpc.CallOption) (*Persons, error)
 	IsPersonWithIDExists(ctx context.Context, in *IsPersonWithIDExistsRequest, opts ...grpc.CallOption) (*IsPersonWithIDExistsResponse, error)
 	IsPersonExists(ctx context.Context, in *IsPersonExistsRequest, opts ...grpc.CallOption) (*IsPersonExistsResponse, error)
+	IsPersonsExists(ctx context.Context, in *IsPersonsExistsRequest, opts ...grpc.CallOption) (*IsPersonsExistsResponse, error)
 	UpdatePersonFields(ctx context.Context, in *UpdatePersonFieldsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UpdatePerson(ctx context.Context, in *UpdatePersonRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	CreatePerson(ctx context.Context, in *CreatePersonRequest, opts ...grpc.CallOption) (*CreatePersonResponce, error)
@@ -87,6 +88,15 @@ func (c *moviesPersonsServiceV1Client) IsPersonExists(ctx context.Context, in *I
 	return out, nil
 }
 
+func (c *moviesPersonsServiceV1Client) IsPersonsExists(ctx context.Context, in *IsPersonsExistsRequest, opts ...grpc.CallOption) (*IsPersonsExistsResponse, error) {
+	out := new(IsPersonsExistsResponse)
+	err := c.cc.Invoke(ctx, "/admin_movies_persons_service.moviesPersonsServiceV1/IsPersonsExists", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *moviesPersonsServiceV1Client) UpdatePersonFields(ctx context.Context, in *UpdatePersonFieldsRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
 	out := new(emptypb.Empty)
 	err := c.cc.Invoke(ctx, "/admin_movies_persons_service.moviesPersonsServiceV1/UpdatePersonFields", in, out, opts...)
@@ -132,6 +142,7 @@ type MoviesPersonsServiceV1Server interface {
 	SearchPersonByName(context.Context, *SearchPersonByNameRequest) (*Persons, error)
 	IsPersonWithIDExists(context.Context, *IsPersonWithIDExistsRequest) (*IsPersonWithIDExistsResponse, error)
 	IsPersonExists(context.Context, *IsPersonExistsRequest) (*IsPersonExistsResponse, error)
+	IsPersonsExists(context.Context, *IsPersonsExistsRequest) (*IsPersonsExistsResponse, error)
 	UpdatePersonFields(context.Context, *UpdatePersonFieldsRequest) (*emptypb.Empty, error)
 	UpdatePerson(context.Context, *UpdatePersonRequest) (*emptypb.Empty, error)
 	CreatePerson(context.Context, *CreatePersonRequest) (*CreatePersonResponce, error)
@@ -157,6 +168,9 @@ func (UnimplementedMoviesPersonsServiceV1Server) IsPersonWithIDExists(context.Co
 }
 func (UnimplementedMoviesPersonsServiceV1Server) IsPersonExists(context.Context, *IsPersonExistsRequest) (*IsPersonExistsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IsPersonExists not implemented")
+}
+func (UnimplementedMoviesPersonsServiceV1Server) IsPersonsExists(context.Context, *IsPersonsExistsRequest) (*IsPersonsExistsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method IsPersonsExists not implemented")
 }
 func (UnimplementedMoviesPersonsServiceV1Server) UpdatePersonFields(context.Context, *UpdatePersonFieldsRequest) (*emptypb.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePersonFields not implemented")
@@ -274,6 +288,24 @@ func _MoviesPersonsServiceV1_IsPersonExists_Handler(srv interface{}, ctx context
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MoviesPersonsServiceV1_IsPersonsExists_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(IsPersonsExistsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MoviesPersonsServiceV1Server).IsPersonsExists(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/admin_movies_persons_service.moviesPersonsServiceV1/IsPersonsExists",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MoviesPersonsServiceV1Server).IsPersonsExists(ctx, req.(*IsPersonsExistsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _MoviesPersonsServiceV1_UpdatePersonFields_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UpdatePersonFieldsRequest)
 	if err := dec(in); err != nil {
@@ -372,6 +404,10 @@ var MoviesPersonsServiceV1_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "IsPersonExists",
 			Handler:    _MoviesPersonsServiceV1_IsPersonExists_Handler,
+		},
+		{
+			MethodName: "IsPersonsExists",
+			Handler:    _MoviesPersonsServiceV1_IsPersonsExists_Handler,
 		},
 		{
 			MethodName: "UpdatePersonFields",

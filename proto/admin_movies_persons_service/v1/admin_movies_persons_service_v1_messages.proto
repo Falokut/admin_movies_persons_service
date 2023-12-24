@@ -45,6 +45,16 @@ message CreatePersonResponce {
   string PersonID = 1[json_name="person_id"];;
 }
 
+message IsPersonsExistsRequest {
+    // use ',' as separator
+    string PersonsIDs = 1[json_name="persons_ids"];
+}
+
+message IsPersonsExistsResponse {
+  bool PersonsExists = 1[json_name="persons_exists"];
+  repeated int32 NotExistIDs = 2[json_name="not_exist_ids"];
+}
+
 message UpdatePersonFieldsRequest {
   // person id for updating
  string ID = 1[json_name="id"];

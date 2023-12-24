@@ -61,5 +61,6 @@ type PersonsRepository interface {
 	CreatePerson(ctx context.Context, person CreatePersonParam) (string, error)
 	IsPersonWithIDExist(ctx context.Context, id string) (bool, error)
 	IsPersonAlreadyExists(ctx context.Context, person SearchPersonParam) (bool, []string, error)
+	IsPersonsExists(ctx context.Context, ids []string) ([]int32, error)
 	SearchPersonByName(ctx context.Context, name string, limit, offset int32) ([]Person, error)
 }

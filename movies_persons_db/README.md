@@ -20,4 +20,8 @@ CREATE ROLE admin_movies_persons_service WITH
 ```
 
 3. setup pgbouncer:
-* change passwords in docker\pgbouncer\userlist.txt
+* create userlist.txt in docker/pgbouncer and provide passwords: 
+```
+"admin_movies_persons_service" "yourpassword"
+"postgres" "yourpassword"
+```

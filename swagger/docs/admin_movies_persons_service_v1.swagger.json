@@ -506,6 +506,49 @@
           "moviesPersonsServiceV1"
         ]
       }
+    },
+    "/v1/persons/exists": {
+      "get": {
+        "operationId": "moviesPersonsServiceV1_IsPersonsExists",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "$ref": "#/definitions/admin_movies_persons_serviceIsPersonsExistsResponse"
+            }
+          },
+          "404": {
+            "description": "Returned when the resource does not exist.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "500": {
+            "description": "Something went wrong.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          },
+          "default": {
+            "description": "An unexpected error response.",
+            "schema": {
+              "$ref": "#/definitions/rpcStatus"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "persons_ids",
+            "description": "use ',' as separator",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "moviesPersonsServiceV1"
+        ]
+      }
     }
   },
   "definitions": {
@@ -569,6 +612,21 @@
       "properties": {
         "person_exists": {
           "type": "boolean"
+        }
+      }
+    },
+    "admin_movies_persons_serviceIsPersonsExistsResponse": {
+      "type": "object",
+      "properties": {
+        "persons_exists": {
+          "type": "boolean"
+        },
+        "not_exist_ids": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "format": "int32"
+          }
         }
       }
     },

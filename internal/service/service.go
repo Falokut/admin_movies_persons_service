@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 
@@ -292,7 +293,8 @@ func (s *MoviesPersonsService) UpdatePerson(ctx context.Context, in *movies_pers
 }
 
 func (s *MoviesPersonsService) SearchPersonByName(ctx context.Context, in *movies_persons_service.SearchPersonByNameRequest) (*movies_persons_service.Persons, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "MoviesPersonsService.SearchPersonByNameRequest")
+	span, ctx := opentracing.StartSpanFromContext(ctx,
+		"MoviesPersonsService.SearchPersonByName")
 	defer span.Finish()
 
 	if in.Name == "" {
@@ -315,6 +317,44 @@ func (s *MoviesPersonsService) SearchPersonByName(ctx context.Context, in *movie
 
 	span.SetTag("grpc.status", codes.OK)
 	return s.convertPersons(ctx, persons), nil
+}
+
+func (s *MoviesPersonsService) IsPersonsExists(ctx context.Context,
+	in *movies_persons_service.IsPersonsExistsRequest) (*movies_persons_service.IsPersonsExistsResponse, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx,
+		"MoviesPersonsService.IsPersonsExists")
+	defer span.Finish()
+
+	in.PersonsIDs = strings.TrimSpace(strings.ReplaceAll(in.PersonsIDs, `"`, ""))
+	if in.PersonsIDs == "" {
+		return nil, s.errorHandler.createExtendedErrorResponceWithSpan(span, ErrInvalidArgument, "",
+			"persons_ids mustn't be empty")
+	}
+
+	needCheckIDs := strings.Split(in.PersonsIDs, ",")
+	ids, err := s.repo.IsPersonsExists(ctx, needCheckIDs)
+	if err != nil {
+		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInternal, err.Error())
+	}
+
+	findedIDs := make(map[int32]struct{}, len(ids))
+	for _, id := range ids {
+		if _, ok := findedIDs[id]; !ok {
+			findedIDs[id] = struct{}{}
+		}
+	}
+
+	var notFoundedIDs = make([]int32, 0, len(needCheckIDs))
+	for _, id := range needCheckIDs {
+		needCheckID, _ := strconv.Atoi(id)
+		if _, ok := findedIDs[int32(needCheckID)]; !ok {
+			notFoundedIDs = append(notFoundedIDs, int32(needCheckID))
+		}
+	}
+
+	span.SetTag("grpc.status", codes.OK)
+	return &movies_persons_service.IsPersonsExistsResponse{PersonsExists: len(needCheckIDs) == len(ids),
+		NotExistIDs: notFoundedIDs}, nil
 }
 
 func (s *MoviesPersonsService) convertPersons(ctx context.Context,

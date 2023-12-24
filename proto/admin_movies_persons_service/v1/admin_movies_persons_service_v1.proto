@@ -74,7 +74,13 @@ service moviesPersonsServiceV1 {
             get: "/v1/person/exists"
         };
     }
-    
+
+    rpc IsPersonsExists(IsPersonsExistsRequest) returns(IsPersonsExistsResponse) {
+        option (google.api.http) = {
+            get: "/v1/persons/exists"
+        };
+    }
+
     rpc UpdatePersonFields(UpdatePersonFieldsRequest) returns(google.protobuf.Empty){
         option (google.api.http) = {
             // must be patch, but patch doesn't work stable

@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/Falokut/admin_movies_persons_service/internal/config"
+	"github.com/Falokut/admin_movies_persons_service/internal/events"
 	"github.com/Falokut/admin_movies_persons_service/internal/repository"
 	"github.com/Falokut/admin_movies_persons_service/internal/service"
 	movies_persons_service "github.com/Falokut/admin_movies_persons_service/pkg/admin_movies_persons_service/v1/protos"
@@ -67,7 +68,7 @@ func main() {
 	}
 
 	logger.Info("Repository initializing")
-	repo := repository.NewPersonsRepository(database)
+	repo := repository.NewPersonsRepository(database, logger.Logger)
 	defer repo.Shutdown()
 
 	conn, err := getImageStorageConnection(appCfg)
@@ -97,8 +98,9 @@ func main() {
 	imagesService := service.NewImagesService(getImageServiceConfig(appCfg),
 		logger.Logger, imageStorageService, imageProcessingService)
 
+	personsEvents := events.NewPersonsEvents(events.KafkaConfig{Brokers: appCfg.KafkaConfig.Brokers}, logger.Logger)
 	logger.Info("Service initializing")
-	service := service.NewMoviesPersonsService(logger.Logger, repo, imagesService)
+	service := service.NewMoviesPersonsService(logger.Logger, repo, imagesService, personsEvents)
 
 	logger.Info("Server initializing")
 	s := server.NewServer(logger.Logger, service)

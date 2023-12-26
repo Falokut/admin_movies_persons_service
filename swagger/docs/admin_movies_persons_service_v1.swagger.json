@@ -267,7 +267,8 @@
             "name": "person_id",
             "in": "query",
             "required": false,
-            "type": "string"
+            "type": "integer",
+            "format": "int32"
           }
         ],
         "tags": [
@@ -578,7 +579,8 @@
       "type": "object",
       "properties": {
         "person_id": {
-          "type": "string"
+          "type": "integer",
+          "format": "int32"
         }
       }
     },
@@ -588,7 +590,8 @@
         "deleted_persons_ids": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "integer",
+            "format": "int32"
           }
         }
       }
@@ -602,7 +605,8 @@
         "finded_persons_ids": {
           "type": "array",
           "items": {
-            "type": "string"
+            "type": "integer",
+            "format": "int32"
           }
         }
       }
@@ -665,7 +669,8 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "string",
+          "type": "integer",
+          "format": "int32",
           "title": "person id for updating"
         },
         "fullname_ru": {
@@ -691,7 +696,8 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "string",
+          "type": "integer",
+          "format": "int32",
           "title": "person id for updating"
         },
         "fullname_ru": {

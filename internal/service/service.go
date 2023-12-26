@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Falokut/admin_movies_persons_service/internal/events"
 	"github.com/Falokut/admin_movies_persons_service/internal/repository"
 	movies_persons_service "github.com/Falokut/admin_movies_persons_service/pkg/admin_movies_persons_service/v1/protos"
 	"github.com/Falokut/grpc_errors"
@@ -25,17 +26,21 @@ type MoviesPersonsService struct {
 	logger        *logrus.Logger
 	imagesService ImagesService
 	repo          repository.PersonsRepository
+	eventsMQ      events.PersonsEventsMQ
 	errorHandler  errorHandler
 }
 
-func NewMoviesPersonsService(logger *logrus.Logger, repo repository.PersonsRepository,
-	imagesService ImagesService) *MoviesPersonsService {
+func NewMoviesPersonsService(logger *logrus.Logger,
+	repo repository.PersonsRepository,
+	imagesService ImagesService,
+	eventsMQ events.PersonsEventsMQ) *MoviesPersonsService {
 	errorHandler := newErrorHandler(logger)
 	return &MoviesPersonsService{
 		logger:        logger,
 		repo:          repo,
 		errorHandler:  errorHandler,
 		imagesService: imagesService,
+		eventsMQ:      eventsMQ,
 	}
 }
 
@@ -46,9 +51,7 @@ func (s *MoviesPersonsService) GetPersons(ctx context.Context,
 
 	offset := in.Limit * (in.Page - 1)
 	if err := validateLimitAndPage(in.Page, in.Limit); err != nil {
-		span.SetTag("grpc.status", status.Code(err))
-		ext.LogError(span, err)
-		return nil, err
+		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInvalidArgument, err.Error())
 	}
 
 	var persons []repository.Person
@@ -62,7 +65,7 @@ func (s *MoviesPersonsService) GetPersons(ctx context.Context,
 		}
 
 		ids := strings.Split(in.PersonsIDs, ",")
-		persons, err = s.repo.GetPersons(ctx, ids, in.Limit, offset)
+		persons, err = s.repo.GetPersons(ctx, convertStringsSlice(ids), in.Limit, offset)
 	}
 
 	if errors.Is(err, repository.ErrNotFound) {
@@ -80,13 +83,10 @@ func (s *MoviesPersonsService) SearchPerson(ctx context.Context,
 	span, ctx := opentracing.StartSpanFromContext(ctx, "MoviesPersonsService.SearchPerson")
 	defer span.Finish()
 
-	if err := validateLimitAndPage(in.Page, in.Limit); err != nil {
-		span.SetTag("grpc.status", status.Code(err))
-		ext.LogError(span, err)
-		return nil, err
-	}
-
 	offset := in.Limit * (in.Page - 1)
+	if err := validateLimitAndPage(in.Page, in.Limit); err != nil {
+		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInvalidArgument, err.Error())
+	}
 
 	persons, err := s.repo.SearchPerson(ctx, repository.SearchPersonParam{
 		FullnameRU: in.GetFullnameRU(),
@@ -95,20 +95,23 @@ func (s *MoviesPersonsService) SearchPerson(ctx context.Context,
 		Sex:        in.GetSex(),
 	}, in.Limit, offset)
 
-	if errors.Is(err, repository.ErrInvalidArgument) {
+	switch err {
+	case repository.ErrInvalidArgument:
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInvalidArgument, "")
-	} else if errors.Is(err, repository.ErrNotFound) {
+	case repository.ErrNotFound:
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrNotFound, "")
-	} else if err != nil {
+	case nil:
+		span.SetTag("grpc.status", codes.OK)
+		return s.convertPersons(ctx, persons), nil
+	default:
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInternal, err.Error())
 	}
-
-	span.SetTag("grpc.status", codes.OK)
-	return s.convertPersons(ctx, persons), nil
 }
 
-func (s *MoviesPersonsService) UpdatePersonFields(ctx context.Context, in *movies_persons_service.UpdatePersonFieldsRequest) (*emptypb.Empty, error) {
-	span, ctx := opentracing.StartSpanFromContext(ctx, "MoviesPersonsService.UpdatePersonFields")
+func (s *MoviesPersonsService) UpdatePersonFields(ctx context.Context,
+	in *movies_persons_service.UpdatePersonFieldsRequest) (*emptypb.Empty, error) {
+	span, ctx := opentracing.StartSpanFromContext(ctx,
+		"MoviesPersonsService.UpdatePersonFields")
 	defer span.Finish()
 
 	exists, err := s.IsPersonWithIDExists(ctx,
@@ -139,8 +142,7 @@ func (s *MoviesPersonsService) UpdatePersonFields(ctx context.Context, in *movie
 
 	if errors.Is(err, repository.ErrNotFound) {
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrNotFound, "")
-	}
-	if err != nil {
+	} else if err != nil {
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInternal, err.Error())
 	}
 
@@ -154,24 +156,28 @@ func (s *MoviesPersonsService) DeletePersons(ctx context.Context,
 	defer span.Finish()
 
 	in.PersonsIDs = strings.TrimSpace(strings.ReplaceAll(in.PersonsIDs, `"`, ""))
-	if err := checkParam(in.PersonsIDs); err != nil {
+	if in.PersonsIDs == "" {
+		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInvalidArgument, "persons_ids mustn't be empty")
+	} else if err := checkParam(in.PersonsIDs); err != nil {
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInvalidParam, "")
 	}
 	ids := strings.Split(in.PersonsIDs, ",")
 
-	if len(ids) == 0 {
-		return &movies_persons_service.DeletePersonsResponce{DeletedPersonIDs: ids},
-			s.errorHandler.createErrorResponceWithSpan(span, ErrInvalidArgument, "there is no")
-	}
-
-	ids, err := s.repo.DeletePersons(ctx, ids)
+	deletedIDs, err := s.repo.DeletePersons(ctx, convertStringsSlice(ids))
 	if err != nil {
-		return &movies_persons_service.DeletePersonsResponce{DeletedPersonIDs: ids},
-			s.errorHandler.createErrorResponceWithSpan(span, ErrInternal, err.Error())
+		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInternal, err.Error())
 	}
 
+	go func(s *MoviesPersonsService, deletedIDs []int32) {
+		for _, id := range deletedIDs {
+			err := s.eventsMQ.PersonDeleted(context.Background(), id)
+			if err != nil {
+				s.logger.Error(err)
+			}
+		}
+	}(s, deletedIDs)
 	span.SetTag("grpc.status", codes.OK)
-	return &movies_persons_service.DeletePersonsResponce{DeletedPersonIDs: ids}, nil
+	return &movies_persons_service.DeletePersonsResponce{DeletedPersonIDs: deletedIDs}, nil
 }
 
 func (s *MoviesPersonsService) IsPersonWithIDExists(ctx context.Context,
@@ -224,7 +230,7 @@ func (s *MoviesPersonsService) CreatePerson(ctx context.Context,
 	} else if res.PersonExists {
 		msg := fmt.Sprintf("finded persons with ids: %s,"+
 			"If this list does not contain the id of the person you"+
-			"want to add, add more information about the person", strings.Join(res.FindedPersonsIDs, ", "))
+			"want to add, add more information about the person", formatSlice(res.FindedPersonsIDs))
 		return nil, s.errorHandler.createExtendedErrorResponceWithSpan(span, ErrAlreadyExists, "", msg)
 	}
 
@@ -251,6 +257,25 @@ func (s *MoviesPersonsService) CreatePerson(ctx context.Context,
 
 	span.SetTag("grpc.status", codes.OK)
 	return &movies_persons_service.CreatePersonResponce{PersonID: id}, nil
+}
+
+func formatSlice[T any](nums []T) string {
+	var str = make([]string, 0, len(nums))
+	for _, num := range nums {
+		str = append(str, fmt.Sprint(num))
+	}
+	return strings.Join(str, ",")
+}
+
+func convertStringsSlice(str []string) []int32 {
+	var nums = make([]int32, 0, len(str))
+	for _, s := range str {
+		num, err := strconv.Atoi(s)
+		if err == nil {
+			nums = append(nums, int32(num))
+		}
+	}
+	return nums
 }
 
 func (s *MoviesPersonsService) UpdatePerson(ctx context.Context, in *movies_persons_service.UpdatePersonRequest) (*emptypb.Empty, error) {
@@ -301,13 +326,11 @@ func (s *MoviesPersonsService) SearchPersonByName(ctx context.Context, in *movie
 		return nil, s.errorHandler.createExtendedErrorResponceWithSpan(span, ErrInvalidArgument, "", "name mustn't be empty")
 	}
 
+	offset := in.Limit * (in.Page - 1)
 	if err := validateLimitAndPage(in.Page, in.Limit); err != nil {
-		span.SetTag("grpc.status", status.Code(err))
-		ext.LogError(span, err)
-		return nil, err
+		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInvalidArgument, err.Error())
 	}
 
-	offset := in.Limit * (in.Page - 1)
 	persons, err := s.repo.SearchPersonByName(ctx, in.Name, in.Limit, offset)
 	if errors.Is(err, repository.ErrNotFound) {
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrNotFound, "")
@@ -332,11 +355,15 @@ func (s *MoviesPersonsService) IsPersonsExists(ctx context.Context,
 	}
 
 	needCheckIDs := strings.Split(in.PersonsIDs, ",")
-	ids, err := s.repo.IsPersonsExists(ctx, needCheckIDs)
+	ids, exists, err := s.repo.IsPersonsExists(ctx, convertStringsSlice(needCheckIDs))
 	if err != nil {
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInternal, err.Error())
 	}
 
+	if exists {
+		span.SetTag("grpc.status", codes.OK)
+		return &movies_persons_service.IsPersonsExistsResponse{PersonsExists: true}, nil
+	}
 	findedIDs := make(map[int32]struct{}, len(ids))
 	for _, id := range ids {
 		if _, ok := findedIDs[id]; !ok {
@@ -353,8 +380,7 @@ func (s *MoviesPersonsService) IsPersonsExists(ctx context.Context,
 	}
 
 	span.SetTag("grpc.status", codes.OK)
-	return &movies_persons_service.IsPersonsExistsResponse{PersonsExists: len(needCheckIDs) == len(ids),
-		NotExistIDs: notFoundedIDs}, nil
+	return &movies_persons_service.IsPersonsExistsResponse{PersonsExists: false, NotExistIDs: notFoundedIDs}, nil
 }
 
 func (s *MoviesPersonsService) convertPersons(ctx context.Context,

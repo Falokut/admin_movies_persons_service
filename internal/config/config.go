@@ -45,6 +45,9 @@ type Config struct {
 
 	DBConfig     repository.DBConfig `yaml:"db_config"`
 	JaegerConfig jaeger.Config       `yaml:"jaeger"`
+	KafkaConfig  struct {
+		Brokers []string `yaml:"brokers"`
+	} `yaml:"kafka"`
 }
 
 var instance *Config

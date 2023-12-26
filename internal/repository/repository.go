@@ -53,14 +53,14 @@ var ErrNotFound = errors.New("entity not found")
 var ErrInvalidArgument = errors.New("invalid input data")
 
 type PersonsRepository interface {
-	GetPersons(ctx context.Context, ids []string, limit, offset int32) ([]Person, error)
+	GetPersons(ctx context.Context, ids []int32, limit, offset int32) ([]Person, error)
 	GetAllPersons(ctx context.Context, limit, offset int32) ([]Person, error)
-	DeletePersons(ctx context.Context, ids []string) ([]string, error)
+	DeletePersons(ctx context.Context, ids []int32) ([]int32, error)
 	SearchPerson(ctx context.Context, person SearchPersonParam, limit, offset int32) ([]Person, error)
-	UpdatePerson(ctx context.Context, id string, toUpdate UpdatePersonParam, excludeDefaultValues bool) error
-	CreatePerson(ctx context.Context, person CreatePersonParam) (string, error)
-	IsPersonWithIDExist(ctx context.Context, id string) (bool, error)
-	IsPersonAlreadyExists(ctx context.Context, person SearchPersonParam) (bool, []string, error)
-	IsPersonsExists(ctx context.Context, ids []string) ([]int32, error)
+	UpdatePerson(ctx context.Context, id int32, toUpdate UpdatePersonParam, excludeDefaultValues bool) error
+	CreatePerson(ctx context.Context, person CreatePersonParam) (int32, error)
+	IsPersonWithIDExist(ctx context.Context, id int32) (bool, error)
+	IsPersonAlreadyExists(ctx context.Context, person SearchPersonParam) (bool, []int32, error)
+	IsPersonsExists(ctx context.Context, ids []int32) ([]int32, bool, error)
 	SearchPersonByName(ctx context.Context, name string, limit, offset int32) ([]Person, error)
 }

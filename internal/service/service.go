@@ -61,7 +61,7 @@ func (s *MoviesPersonsService) GetPersons(ctx context.Context,
 	} else {
 		in.PersonsIDs = strings.TrimSpace(strings.ReplaceAll(in.PersonsIDs, `"`, ""))
 		if err := checkParam(in.PersonsIDs); err != nil {
-			return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInvalidParam, "")
+			return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInvalidArgument, err.Error())
 		}
 
 		ids := strings.Split(in.PersonsIDs, ",")
@@ -159,7 +159,7 @@ func (s *MoviesPersonsService) DeletePersons(ctx context.Context,
 	if in.PersonsIDs == "" {
 		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInvalidArgument, "persons_ids mustn't be empty")
 	} else if err := checkParam(in.PersonsIDs); err != nil {
-		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInvalidParam, "")
+		return nil, s.errorHandler.createErrorResponceWithSpan(span, ErrInvalidArgument, err.Error())
 	}
 	ids := strings.Split(in.PersonsIDs, ",")
 
@@ -278,7 +278,8 @@ func convertStringsSlice(str []string) []int32 {
 	return nums
 }
 
-func (s *MoviesPersonsService) UpdatePerson(ctx context.Context, in *movies_persons_service.UpdatePersonRequest) (*emptypb.Empty, error) {
+func (s *MoviesPersonsService) UpdatePerson(ctx context.Context,
+	in *movies_persons_service.UpdatePersonRequest) (*emptypb.Empty, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx, "MoviesPersonsService.UpdatePerson")
 	defer span.Finish()
 
@@ -317,7 +318,8 @@ func (s *MoviesPersonsService) UpdatePerson(ctx context.Context, in *movies_pers
 	return &emptypb.Empty{}, nil
 }
 
-func (s *MoviesPersonsService) SearchPersonByName(ctx context.Context, in *movies_persons_service.SearchPersonByNameRequest) (*movies_persons_service.Persons, error) {
+func (s *MoviesPersonsService) SearchPersonByName(ctx context.Context,
+	in *movies_persons_service.SearchPersonByNameRequest) (*movies_persons_service.Persons, error) {
 	span, ctx := opentracing.StartSpanFromContext(ctx,
 		"MoviesPersonsService.SearchPersonByName")
 	defer span.Finish()

@@ -99,6 +99,8 @@ func main() {
 		logger.Logger, imageStorageService, imageProcessingService)
 
 	personsEvents := events.NewPersonsEvents(events.KafkaConfig{Brokers: appCfg.KafkaConfig.Brokers}, logger.Logger)
+	defer personsEvents.Shutdown()
+
 	logger.Info("Service initializing")
 	service := service.NewMoviesPersonsService(logger.Logger, repo, imagesService, personsEvents)
 

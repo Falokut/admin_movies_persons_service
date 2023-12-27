@@ -25,7 +25,7 @@ const (
 )
 
 func NewPersonsRepository(db *sqlx.DB, logger *logrus.Logger) *personsRepository {
-	return &personsRepository{db: db}
+	return &personsRepository{db: db, logger: logger}
 }
 
 func NewPostgreDB(cfg DBConfig) (*sqlx.DB, error) {
@@ -80,7 +80,7 @@ func (r *personsRepository) IsPersonAlreadyExists(ctx context.Context, person Se
 		return false, []int32{}, ErrInvalidArgument
 	}
 	var ids []int32
-	err = r.db.GetContext(ctx, &ids, query, args...)
+	err = r.db.SelectContext(ctx, &ids, query, args...)
 	if err != nil {
 		r.logger.Errorf("%v query: %s args: %v", err.Error(), query, args)
 		return false, []int32{}, err
@@ -189,13 +189,11 @@ func (r *personsRepository) IsPersonsExists(ctx context.Context, ids []int32) ([
 	query := fmt.Sprintf("SELECT id FROM %s WHERE id=ANY($1);",
 		personsTableName)
 
-	var foundIDs = make([]int32, len(ids))
+	var foundIDs []int32
 	err = r.db.SelectContext(ctx, &foundIDs, query, ids)
 	if err != nil {
 		r.logger.Errorf("%v query: %s args: %v", err.Error(), query, ids)
 		return []int32{}, false, err
-	} else if len(foundIDs) == 0 {
-		return []int32{}, false, ErrNotFound
 	}
 
 	return foundIDs, len(ids) == len(foundIDs), nil

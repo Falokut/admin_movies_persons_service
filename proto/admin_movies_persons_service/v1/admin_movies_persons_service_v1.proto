@@ -14,7 +14,7 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
     produces: "application/json";
 
     info: {
-        title: "Admin panel for movies persons service";
+        title: "Admin movies persons service";
         version: "1.0";
         contact: {
             name: "Falokut";

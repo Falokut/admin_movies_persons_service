@@ -27,6 +27,8 @@ var errorCodes = map[error]codes.Code{
 	ErrInternal:        codes.Internal,
 	ErrInvalidImage:    codes.InvalidArgument,
 	ErrAlreadyExists:   codes.AlreadyExists,
+	ErrInvalidParam:    codes.InvalidArgument,
+	ErrEmptyParam:      codes.InvalidArgument,
 }
 
 type errorHandler struct {

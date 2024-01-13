@@ -381,6 +381,11 @@ func (s *MoviesPersonsService) IsPersonsExists(ctx context.Context,
 		}
 	}
 
+	if len(notFoundedIDs) == 0 {
+		span.SetTag("grpc.status", codes.OK)
+		return &movies_persons_service.IsPersonsExistsResponse{PersonsExists: true}, nil
+	}
+
 	span.SetTag("grpc.status", codes.OK)
 	return &movies_persons_service.IsPersonsExistsResponse{PersonsExists: false, NotExistIDs: notFoundedIDs}, nil
 }

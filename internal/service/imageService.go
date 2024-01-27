@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"net/url"
 	"runtime"
 
 	image_processing_service "github.com/Falokut/image_processing_service/pkg/image_processing_service/v1/protos"
@@ -67,17 +66,7 @@ func (s *imagesService) GetPictureURL(ctx context.Context, pictureID string) str
 		return ""
 	}
 
-	u, err := url.Parse(s.cfg.BasePhotoUrl)
-	if err != nil {
-		s.logger.Fatalf("can't parse url. error: %s", err.Error())
-		return ""
-	}
-
-	q := u.Query()
-	q.Add("image_id", pictureID)
-	q.Add("category", s.cfg.PicturesCategory)
-	u.RawQuery = q.Encode()
-	return u.String()
+	return s.cfg.BasePhotoUrl + "/" + s.cfg.PicturesCategory + "/" + pictureID
 }
 
 // returns error if image not valid

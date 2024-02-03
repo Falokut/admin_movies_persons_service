@@ -5,6 +5,7 @@
         + [Database config](#database-config)
         + [Jaeger config](#jaeger-config)
         + [Prometheus config](#prometheus-config)
+        + [Secure connection config](#secure-connection-config)
 + [Related services](#related-services)
 + [Metrics](#metrics)
 + [Docs](#docs)
@@ -39,9 +40,11 @@ if supported values is empty, then any type values are supported
 |db_config|||nested yml configuration  [database config](#database-config) || configuration for database connection | |
 |jaeger|||nested yml configuration  [jaeger config](#jaeger-config)|configuration for jaeger connection ||
 |storage_addr|image_storage_service|IMAGE_STORAGE_ADDRESS|string|ip address(or host) with port of image storage service service| all valid addresses formatted like host:port or ip-address:port|
+|connection_config|  image_storage_service    |   | nested yml configuration  [secure connection config](#secure-connection-config) | |
 |base_photo_url|image_storage_service|BASE_PHOTO_URL|string|url for getting a photo||
 |photo_category|image_storage_service|PHOTO_CATEGORY|string|category on storage for photo||
 |addr|image_processing_service|IMAGE_PROCESSING_ADDRESS|string|category on storage for photo||
+|connection_config|  image_processing_service    |   | nested yml configuration  [secure connection config](#secure-connection-config) | |
 |resize_type|image_processing_service|RESIZE_TYPE|string|resizing method for photo|Box,CatmullRom,Lanczos,Linear,MitchellNetravali,NearestNeighbor|
 |photo_height|image_processing_service|PHOTO_HEIGHT|int32|photo height after resize|only positive values of int32|
 |photo_width|image_processing_service|PHOTO_WIDTH|int32|photo width after resize|only positive values of int32|
@@ -76,6 +79,15 @@ if supported values is empty, then any type values are supported
 |-|-|-|-|-|
 |host|METRIC_HOST|string|ip address or host to listen for prometheus service||
 |port|METRIC_PORT|string|port to listen for  of prometheus service| any valid port that is not occupied by other services. The string should not contain delimiters, only the port number|
+
+
+# Secure connection config
+|yml name| param type| description | supported values |
+|-|-|-|-|
+|dial_method|string|dial method|INSECURE,NIL_TLS_CONFIG,CLIENT_WITH_SYSTEM_CERT_POOL,SERVER|
+|server_name|string|server name overriding, used when dial_method=CLIENT_WITH_SYSTEM_CERT_POOL||
+|cert_name|string|certificate file name, used when dial_method=SERVER||
+|key_name|string|key file name, used when dial_method=SERVER||
 
 # Related Services
    + [Images storage service](https://github.com/Falokut/images_storage_service)  

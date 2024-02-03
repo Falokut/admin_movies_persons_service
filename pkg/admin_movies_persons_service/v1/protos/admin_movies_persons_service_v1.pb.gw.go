@@ -104,12 +104,29 @@ func local_request_MoviesPersonsServiceV1_SearchPerson_0(ctx context.Context, ma
 }
 
 var (
-	filter_MoviesPersonsServiceV1_SearchPersonByName_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
+	filter_MoviesPersonsServiceV1_SearchPersonByName_0 = &utilities.DoubleArray{Encoding: map[string]int{"Name": 0, "name": 1}, Base: []int{1, 1, 2, 0, 0}, Check: []int{0, 1, 1, 2, 3}}
 )
 
 func request_MoviesPersonsServiceV1_SearchPersonByName_0(ctx context.Context, marshaler runtime.Marshaler, client MoviesPersonsServiceV1Client, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq SearchPersonByNameRequest
 	var metadata runtime.ServerMetadata
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["Name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "Name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "Name", err)
+	}
 
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
@@ -127,6 +144,23 @@ func local_request_MoviesPersonsServiceV1_SearchPersonByName_0(ctx context.Conte
 	var protoReq SearchPersonByNameRequest
 	var metadata runtime.ServerMetadata
 
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["Name"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "Name")
+	}
+
+	protoReq.Name, err = runtime.String(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "Name", err)
+	}
+
 	if err := req.ParseForm(); err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
@@ -139,19 +173,25 @@ func local_request_MoviesPersonsServiceV1_SearchPersonByName_0(ctx context.Conte
 
 }
 
-var (
-	filter_MoviesPersonsServiceV1_IsPersonWithIDExists_0 = &utilities.DoubleArray{Encoding: map[string]int{}, Base: []int(nil), Check: []int(nil)}
-)
-
 func request_MoviesPersonsServiceV1_IsPersonWithIDExists_0(ctx context.Context, marshaler runtime.Marshaler, client MoviesPersonsServiceV1Client, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
 	var protoReq IsPersonWithIDExistsRequest
 	var metadata runtime.ServerMetadata
 
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["PersonID"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "PersonID")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_MoviesPersonsServiceV1_IsPersonWithIDExists_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+
+	protoReq.PersonID, err = runtime.Int32(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "PersonID", err)
 	}
 
 	msg, err := client.IsPersonWithIDExists(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -163,11 +203,21 @@ func local_request_MoviesPersonsServiceV1_IsPersonWithIDExists_0(ctx context.Con
 	var protoReq IsPersonWithIDExistsRequest
 	var metadata runtime.ServerMetadata
 
-	if err := req.ParseForm(); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["PersonID"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "PersonID")
 	}
-	if err := runtime.PopulateQueryParameters(&protoReq, req.Form, filter_MoviesPersonsServiceV1_IsPersonWithIDExists_0); err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+
+	protoReq.PersonID, err = runtime.Int32(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "PersonID", err)
 	}
 
 	msg, err := server.IsPersonWithIDExists(ctx, &protoReq)
@@ -259,6 +309,23 @@ func request_MoviesPersonsServiceV1_UpdatePersonFields_0(ctx context.Context, ma
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["ID"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "ID")
+	}
+
+	protoReq.ID, err = runtime.Int32(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ID", err)
+	}
+
 	msg, err := client.UpdatePersonFields(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -274,6 +341,23 @@ func local_request_MoviesPersonsServiceV1_UpdatePersonFields_0(ctx context.Conte
 	}
 	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["ID"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "ID")
+	}
+
+	protoReq.ID, err = runtime.Int32(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ID", err)
 	}
 
 	msg, err := server.UpdatePersonFields(ctx, &protoReq)
@@ -293,6 +377,23 @@ func request_MoviesPersonsServiceV1_UpdatePerson_0(ctx context.Context, marshale
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
 	}
 
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["ID"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "ID")
+	}
+
+	protoReq.ID, err = runtime.Int32(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ID", err)
+	}
+
 	msg, err := client.UpdatePerson(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
@@ -308,6 +409,23 @@ func local_request_MoviesPersonsServiceV1_UpdatePerson_0(ctx context.Context, ma
 	}
 	if err := marshaler.NewDecoder(newReader()).Decode(&protoReq); err != nil && err != io.EOF {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "%v", err)
+	}
+
+	var (
+		val string
+		ok  bool
+		err error
+		_   = err
+	)
+
+	val, ok = pathParams["ID"]
+	if !ok {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "ID")
+	}
+
+	protoReq.ID, err = runtime.Int32(val)
+	if err != nil {
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "ID", err)
 	}
 
 	msg, err := server.UpdatePerson(ctx, &protoReq)
@@ -399,7 +517,7 @@ func RegisterMoviesPersonsServiceV1HandlerServer(ctx context.Context, mux *runti
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/GetPersons", runtime.WithHTTPPathPattern("/v1/person"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/GetPersons", runtime.WithHTTPPathPattern("/v1/persons"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -424,7 +542,7 @@ func RegisterMoviesPersonsServiceV1HandlerServer(ctx context.Context, mux *runti
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/SearchPerson", runtime.WithHTTPPathPattern("/v1/person/search"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/SearchPerson", runtime.WithHTTPPathPattern("/v1/persons/search"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -449,7 +567,7 @@ func RegisterMoviesPersonsServiceV1HandlerServer(ctx context.Context, mux *runti
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/SearchPersonByName", runtime.WithHTTPPathPattern("/v1/person/search-by-name"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/SearchPersonByName", runtime.WithHTTPPathPattern("/v1/persons/search/{Name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -474,7 +592,7 @@ func RegisterMoviesPersonsServiceV1HandlerServer(ctx context.Context, mux *runti
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/IsPersonWithIDExists", runtime.WithHTTPPathPattern("/v1/person/id-exists"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/IsPersonWithIDExists", runtime.WithHTTPPathPattern("/v1/person/{PersonID}/exists"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -549,7 +667,7 @@ func RegisterMoviesPersonsServiceV1HandlerServer(ctx context.Context, mux *runti
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/UpdatePersonFields", runtime.WithHTTPPathPattern("/v1/person/update-fields"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/UpdatePersonFields", runtime.WithHTTPPathPattern("/v1/person/{ID}/fields"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -574,7 +692,7 @@ func RegisterMoviesPersonsServiceV1HandlerServer(ctx context.Context, mux *runti
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/UpdatePerson", runtime.WithHTTPPathPattern("/v1/person/update"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/UpdatePerson", runtime.WithHTTPPathPattern("/v1/person/{ID}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -624,7 +742,7 @@ func RegisterMoviesPersonsServiceV1HandlerServer(ctx context.Context, mux *runti
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/DeletePersons", runtime.WithHTTPPathPattern("/v1/person"))
+		annotatedContext, err = runtime.AnnotateIncomingContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/DeletePersons", runtime.WithHTTPPathPattern("/v1/persons"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -688,7 +806,7 @@ func RegisterMoviesPersonsServiceV1HandlerClient(ctx context.Context, mux *runti
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/GetPersons", runtime.WithHTTPPathPattern("/v1/person"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/GetPersons", runtime.WithHTTPPathPattern("/v1/persons"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -710,7 +828,7 @@ func RegisterMoviesPersonsServiceV1HandlerClient(ctx context.Context, mux *runti
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/SearchPerson", runtime.WithHTTPPathPattern("/v1/person/search"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/SearchPerson", runtime.WithHTTPPathPattern("/v1/persons/search"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -732,7 +850,7 @@ func RegisterMoviesPersonsServiceV1HandlerClient(ctx context.Context, mux *runti
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/SearchPersonByName", runtime.WithHTTPPathPattern("/v1/person/search-by-name"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/SearchPersonByName", runtime.WithHTTPPathPattern("/v1/persons/search/{Name}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -754,7 +872,7 @@ func RegisterMoviesPersonsServiceV1HandlerClient(ctx context.Context, mux *runti
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/IsPersonWithIDExists", runtime.WithHTTPPathPattern("/v1/person/id-exists"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/IsPersonWithIDExists", runtime.WithHTTPPathPattern("/v1/person/{PersonID}/exists"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -820,7 +938,7 @@ func RegisterMoviesPersonsServiceV1HandlerClient(ctx context.Context, mux *runti
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/UpdatePersonFields", runtime.WithHTTPPathPattern("/v1/person/update-fields"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/UpdatePersonFields", runtime.WithHTTPPathPattern("/v1/person/{ID}/fields"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -842,7 +960,7 @@ func RegisterMoviesPersonsServiceV1HandlerClient(ctx context.Context, mux *runti
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/UpdatePerson", runtime.WithHTTPPathPattern("/v1/person/update"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/UpdatePerson", runtime.WithHTTPPathPattern("/v1/person/{ID}"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -886,7 +1004,7 @@ func RegisterMoviesPersonsServiceV1HandlerClient(ctx context.Context, mux *runti
 		inboundMarshaler, outboundMarshaler := runtime.MarshalerForRequest(mux, req)
 		var err error
 		var annotatedContext context.Context
-		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/DeletePersons", runtime.WithHTTPPathPattern("/v1/person"))
+		annotatedContext, err = runtime.AnnotateContext(ctx, mux, req, "/admin_movies_persons_service.MoviesPersonsServiceV1/DeletePersons", runtime.WithHTTPPathPattern("/v1/persons"))
 		if err != nil {
 			runtime.HTTPError(ctx, mux, outboundMarshaler, w, req, err)
 			return
@@ -906,25 +1024,25 @@ func RegisterMoviesPersonsServiceV1HandlerClient(ctx context.Context, mux *runti
 }
 
 var (
-	pattern_MoviesPersonsServiceV1_GetPersons_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "person"}, ""))
+	pattern_MoviesPersonsServiceV1_GetPersons_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "persons"}, ""))
 
-	pattern_MoviesPersonsServiceV1_SearchPerson_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "person", "search"}, ""))
+	pattern_MoviesPersonsServiceV1_SearchPerson_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "persons", "search"}, ""))
 
-	pattern_MoviesPersonsServiceV1_SearchPersonByName_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "person", "search-by-name"}, ""))
+	pattern_MoviesPersonsServiceV1_SearchPersonByName_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"v1", "persons", "search", "Name"}, ""))
 
-	pattern_MoviesPersonsServiceV1_IsPersonWithIDExists_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "person", "id-exists"}, ""))
+	pattern_MoviesPersonsServiceV1_IsPersonWithIDExists_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "person", "PersonID", "exists"}, ""))
 
 	pattern_MoviesPersonsServiceV1_IsPersonExists_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "person", "exists"}, ""))
 
 	pattern_MoviesPersonsServiceV1_IsPersonsExists_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "persons", "exists"}, ""))
 
-	pattern_MoviesPersonsServiceV1_UpdatePersonFields_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "person", "update-fields"}, ""))
+	pattern_MoviesPersonsServiceV1_UpdatePersonFields_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2, 2, 3}, []string{"v1", "person", "ID", "fields"}, ""))
 
-	pattern_MoviesPersonsServiceV1_UpdatePerson_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2}, []string{"v1", "person", "update"}, ""))
+	pattern_MoviesPersonsServiceV1_UpdatePerson_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 1, 0, 4, 1, 5, 2}, []string{"v1", "person", "ID"}, ""))
 
 	pattern_MoviesPersonsServiceV1_CreatePerson_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "person"}, ""))
 
-	pattern_MoviesPersonsServiceV1_DeletePersons_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "person"}, ""))
+	pattern_MoviesPersonsServiceV1_DeletePersons_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1}, []string{"v1", "persons"}, ""))
 )
 
 var (

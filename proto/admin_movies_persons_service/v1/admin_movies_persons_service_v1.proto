@@ -49,24 +49,24 @@ option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
 service moviesPersonsServiceV1 {
     rpc GetPersons(GetPersonsRequest) returns(Persons) {
         option (google.api.http) = {
-            get: "/v1/person"
+            get: "/v1/persons"
         };
     }
     rpc SearchPerson(SearchPersonRequest) returns(Persons) {
         option (google.api.http) = {
-            get: "/v1/person/search"
+            get: "/v1/persons/search"
         };
     }
 
     rpc SearchPersonByName(SearchPersonByNameRequest) returns(Persons) {
         option (google.api.http) = {
-            get: "/v1/person/search-by-name"
+            get: "/v1/persons/search/{Name}"
         };
     }
 
     rpc IsPersonWithIDExists(IsPersonWithIDExistsRequest) returns(IsPersonWithIDExistsResponse) {
         option (google.api.http) = {
-            get: "/v1/person/id-exists"
+            get: "/v1/person/{PersonID}/exists"
         };
     }
     rpc IsPersonExists(IsPersonExistsRequest) returns(IsPersonExistsResponse) {
@@ -83,8 +83,7 @@ service moviesPersonsServiceV1 {
 
     rpc UpdatePersonFields(UpdatePersonFieldsRequest) returns(google.protobuf.Empty){
         option (google.api.http) = {
-            // must be patch, but patch doesn't work stable
-            post: "/v1/person/update-fields"
+            post: "/v1/person/{ID}/fields"
             body: "*"
         };
 
@@ -105,7 +104,7 @@ service moviesPersonsServiceV1 {
 
     rpc UpdatePerson(UpdatePersonRequest) returns(google.protobuf.Empty){
         option (google.api.http) = {
-            post: "/v1/person/update"
+            post: "/v1/person/{ID}"
             body: "*"
         };
 
@@ -146,13 +145,13 @@ service moviesPersonsServiceV1 {
 
     rpc DeletePersons(DeletePersonsRequest) returns(DeletePersonsResponce) {
         option (google.api.http) = {
-            delete: "/v1/person"
+            delete: "/v1/persons"
         };
         option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
             responses: {
                 key: "404"
                 value: {
-                    description: "Returned when person not found"
+                    description: "Returned when persons not found"
                     schema: {
                         json_schema: {
                             ref: "#/definitions/rpcStatus";
